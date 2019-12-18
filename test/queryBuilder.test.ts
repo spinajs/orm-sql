@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import 'mocha';
-import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder } from '@spinajs/orm';
+import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder } from '@spinajs/orm';
 import { DI, Inject, Container } from '@spinajs/di';
 import { Configuration } from "@spinajs/configuration";
 import { join, normalize, resolve } from 'path';
@@ -140,11 +140,11 @@ describe("Query builder generic", () => {
         const table = "";
 
         expect(() => {
-            const query = sqb().select("*").from(table).toDB();
+            sqb().select("*").from(table).toDB();
         }).to.throw();
 
         expect(() => {
-            const query = sqb().select("*").from(null).toDB();
+            sqb().select("*").from(null).toDB();
         }).to.throw();
     })
 
@@ -152,11 +152,11 @@ describe("Query builder generic", () => {
         const schema = "";
 
         expect(() => {
-            const query = sqb().select("*").from("users").schema(schema).toDB();
+            sqb().select("*").from("users").schema(schema).toDB();
         }).to.throw();
 
         expect(() => {
-            const query = sqb().select("*").from("users").schema(null).toDB();
+            sqb().select("*").from("users").schema(null).toDB();
         }).to.throw();
     })
 })
@@ -250,7 +250,7 @@ describe("Where query builder", () => {
         expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` >= ?");
 
         expect(() => {
-            let result = sqb().select("*").from("users").where("id", ">==", 1).toDB();
+            sqb().select("*").from("users").where("id", ">==", 1).toDB();
         }).to.throw();
     });
 
@@ -351,7 +351,7 @@ describe("Select query builder", () => {
     })
 
     it("select with order by", () => {
-        const result = sqb().select("*").from("users").orderBy("name", SORT_ORDER.DESC).toDB();
+        const result = sqb().select("*").from("users").orderByDescending("name").toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` ORDER BY ? ?");
         expect(result.bindings).to.be.an("array").to.include("DESC").and.to.include("name");
     })
@@ -516,7 +516,6 @@ describe("schema building", () => {
 
         expect(result.expression).to.contain("`foo` VARCHAR(255) DEFAULT 'abc'");
 
-        debugger;
         result = schqb().createTable("users", (table: TableQueryBuilder) => {
             table.timestamp("foo").default(RawQuery.create("CURRENT_TIMESTAMP"));
         }).toDB();
