@@ -1,7 +1,6 @@
 import { InvalidOperationException } from "@spinajs/exceptions";
-import { ColumnStatement, DeleteQueryBuilder, IColumnsBuilder, IColumnsCompiler, ICompilerOutput, ILimitBuilder, ILimitCompiler, InsertQueryBuilder, IOrderByBuilder, IOrderByCompiler, IQueryCompiler, IWhereBuilder, IWhereCompiler, OrderByBuilder, QueryBuilder, SelectQueryBuilder, UpdateQueryBuilder, SelectQueryCompiler } from "@spinajs/orm";
+import { ColumnStatement, DeleteQueryBuilder, IColumnsBuilder, IColumnsCompiler, ICompilerOutput, ILimitBuilder, ILimitCompiler, InsertQueryBuilder, IOrderByBuilder, IOrderByCompiler, IWhereBuilder, IWhereCompiler, OrderByBuilder, QueryBuilder, SelectQueryBuilder, UpdateQueryBuilder, SelectQueryCompiler } from "@spinajs/orm";
 import { use } from "typescript-mix";
-import { Injectable } from "@spinajs/di";
 
 
 export abstract class SqlQueryCompiler<T extends QueryBuilder> extends SelectQueryCompiler {
@@ -39,13 +38,13 @@ export abstract class SqlQueryCompiler<T extends QueryBuilder> extends SelectQue
 
 export class SqlOrderByCompiler implements IOrderByCompiler {
     public sort(builder: OrderByBuilder): ICompilerOutput {
-        const _sort = builder.getSort();
-        let stmt = ' ';
+        const sort = builder.getSort();
+        let stmt = '';
         const bindings = [];
 
-        if (_sort) {
+        if (sort) {
             stmt = `ORDER BY ? ?`
-            bindings.push(_sort.column, _sort.order);
+            bindings.push(sort.column, sort.order);
         }
 
         return {
@@ -59,7 +58,7 @@ export class SqlLimitCompiler implements ILimitCompiler {
     public limit(builder: ILimitBuilder): ICompilerOutput {
         const limits = builder.getLimits();
         const bindings = [];
-        let stmt = ' ';
+        let stmt = '';
 
         if (limits.limit > 0) {
             stmt += `LIMIT ?`
@@ -162,7 +161,7 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
             _stmt += "DISTINCT "
         }
 
-        if (!this._builder.getColumns()) {
+        if (this._builder.getColumns().length === 0) {
             return _stmt + '*';
         }
 

@@ -1,12 +1,16 @@
 import { expect } from 'chai';
 import 'mocha';
-import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder } from '@spinajs/orm';
-import { DI, Inject, Container } from '@spinajs/di';
+import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, OrmDriver } from '@spinajs/orm';
+import { DI, IContainer } from '@spinajs/di';
 import { Configuration } from "@spinajs/configuration";
 import { join, normalize, resolve } from 'path';
 import _ = require('lodash');
 import { SpinaJsDefaultLog, LogModule } from "@spinajs/log";
 import { SqlOrm } from '../src';
+import { BetweenStatement, ColumnStatement, DeleteQueryCompiler, InsertQueryCompiler, InStatement, RawQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, WhereStatement } from "@spinajs/orm";
+import { SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlSelectQueryCompiler, SqlUpdateQueryCompiler } from "./../src/compilers";
+import { SqlBetweenStatement, SqlColumnStatement, SqlInStatement, SqlRawStatement, SqlWhereStatement } from './../src/statements';
+
 
 export function dir(path: string) {
     return resolve(normalize(join(__dirname, path)));
@@ -15,30 +19,29 @@ export function dir(path: string) {
 
 function sqb() {
     const connection = db().Connections.get("sqlite");
-    return DI.resolve(SelectQueryBuilder, [connection]);
+    return connection.Container.resolve(SelectQueryBuilder, [connection]);
 }
 
 function dqb() {
     const connection = db().Connections.get("sqlite");
-    return DI.resolve(DeleteQueryBuilder, [connection]);
+    return connection.Container.resolve(DeleteQueryBuilder, [connection]);
 }
 
 
 function iqb() {
     const connection = db().Connections.get("sqlite");
-    return DI.resolve(InsertQueryBuilder, [connection]);
+    return connection.Container.resolve(InsertQueryBuilder, [connection]);
 }
 
 function schqb() {
     const connection = db().Connections.get("sqlite");
-    return DI.resolve(SchemaQueryBuilder, [connection]);
+    return connection.Container.resolve(SchemaQueryBuilder, [connection]);
 }
 
 function db() {
     return DI.get(SqlOrm);
 }
 
-@Inject(Container)
 // @ts-ignore
 class FakeSqliteDriver extends OrmDriver {
 
@@ -62,6 +65,22 @@ class FakeSqliteDriver extends OrmDriver {
     public tableInfo(_table: string, _schema: string): Promise<IColumnDescriptor[]> {
         return null;
     }
+
+    public resolve(container: IContainer) {
+        this.Container = container.child();
+
+
+        this.Container.register(SqlInStatement).as(InStatement);
+        this.Container.register(SqlRawStatement).as(RawQueryStatement);
+        this.Container.register(SqlBetweenStatement).as(BetweenStatement);
+        this.Container.register(SqlWhereStatement).as(WhereStatement);
+        this.Container.register(SqlColumnStatement).as(ColumnStatement);
+
+        this.Container.register(SqlSelectQueryCompiler).as(SelectQueryCompiler);
+        this.Container.register(SqlUpdateQueryCompiler).as(UpdateQueryCompiler);
+        this.Container.register(SqlDeleteQueryCompiler).as(DeleteQueryCompiler);
+        this.Container.register(SqlInsertQueryCompiler).as(InsertQueryCompiler);
+    }
 }
 
 export class ConnectionConf extends Configuration {
@@ -77,7 +96,7 @@ export class ConnectionConf extends Configuration {
                 {
                     Driver: "sqlite",
                     Filename: "foo.sqlite",
-                    Name: "cache"
+                    Name: "sqlite"
                 }
             ]
         }
