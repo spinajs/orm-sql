@@ -33,13 +33,13 @@
   "author": "SpinaJS <spinajs@coderush.pl> (https://github.com/spinajs/core)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/spinajs/core/issues"
+    "url": "https://github.com/spinajs/orm-sql/issues"
   },
   "homepage": "https://github.com/spinajs/orm-sql#readme",
   "dependencies": {
-    "@spinajs/di": "^1.0.4",
-    "@spinajs/exceptions": "^1.0.0",
-    "@spinajs/orm": "^1.0.5",
+    "@spinajs/configuration": "^1.0.0",
+    "@spinajs/di": "^1.0.7",
+    "@spinajs/orm": "^1.0.6",
     "typescript-mix": "^3.1.3"
   },
   "devDependencies": {

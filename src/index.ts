@@ -1,15 +1,16 @@
-import { Container, DI } from "@spinajs/di";
-import { BetweenStatement, ColumnStatement, InStatement, Orm, RawQueryStatement, WhereStatement } from "@spinajs/orm";
+import { IContainer } from "@spinajs/di";
+import { BetweenStatement, ColumnStatement, DeleteQueryCompiler, InsertQueryCompiler, InStatement, Orm, RawQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, WhereStatement } from "@spinajs/orm";
+import { SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlSelectQueryCompiler, SqlUpdateQueryCompiler } from "./compilers";
 import { SqlBetweenStatement, SqlColumnStatement, SqlInStatement, SqlRawStatement, SqlWhereStatement } from './statements';
 
 export class SqlOrm extends Orm {
 
-  public Container : Container;
+  public async resolveAsync(container : IContainer) {
 
-  public async initialize() {
+    await super.resolveAsync(container);
 
     // create child container for injecting sql statements & compilers
-    this.Container = DI.child();
+    this.Container = container.child();
 
     this.Container.register(SqlInStatement).as(InStatement);
     this.Container.register(SqlRawStatement).as(RawQueryStatement);
@@ -17,5 +18,9 @@ export class SqlOrm extends Orm {
     this.Container.register(SqlWhereStatement).as(WhereStatement);
     this.Container.register(SqlColumnStatement).as(ColumnStatement);
 
+    this.Container.register(SqlSelectQueryCompiler).as(SelectQueryCompiler);
+    this.Container.register(SqlUpdateQueryCompiler).as(UpdateQueryCompiler);
+    this.Container.register(SqlDeleteQueryCompiler).as(DeleteQueryCompiler);
+    this.Container.register(SqlInsertQueryCompiler).as(InsertQueryCompiler);
   }
 }

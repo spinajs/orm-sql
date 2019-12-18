@@ -1,11 +1,15 @@
 import { InvalidOperationException } from "@spinajs/exceptions";
-import { ColumnStatement, DeleteQueryBuilder, IColumnsBuilder, IColumnsCompiler, ICompilerOutput, ILimitBuilder, ILimitCompiler, InsertQueryBuilder, IOrderByBuilder, IOrderByCompiler, IQueryCompiler, IWhereBuilder, IWhereCompiler, OrderByBuilder, QueryBuilder, SelectQueryBuilder, UpdateQueryBuilder } from "@spinajs/orm";
+import { ColumnStatement, DeleteQueryBuilder, IColumnsBuilder, IColumnsCompiler, ICompilerOutput, ILimitBuilder, ILimitCompiler, InsertQueryBuilder, IOrderByBuilder, IOrderByCompiler, IQueryCompiler, IWhereBuilder, IWhereCompiler, OrderByBuilder, QueryBuilder, SelectQueryBuilder, UpdateQueryBuilder, SelectQueryCompiler } from "@spinajs/orm";
 import { use } from "typescript-mix";
+import { Injectable } from "@spinajs/di";
 
-export abstract class SqlQueryCompiler<T extends QueryBuilder> implements IQueryCompiler {
+
+export abstract class SqlQueryCompiler<T extends QueryBuilder> extends SelectQueryCompiler {
     protected _builder: T;
 
     constructor(builder: T) {
+        super();
+
         if (!builder) {
             throw new InvalidOperationException('builder cannot be null or undefined');
         }
@@ -117,6 +121,7 @@ export class SqlWhereCompiler implements IWhereCompiler {
 
 // tslint:disable-next-line
 export interface SqlSelectQueryCompiler extends IWhereCompiler, ILimitCompiler, IOrderByCompiler, IColumnsCompiler { }
+
 export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder> {
 
     @use(SqlWhereCompiler, SqlOrderByCompiler, SqlLimitCompiler, SqlColumnsCompiler)
@@ -224,10 +229,10 @@ export class SqlUpdateQueryCompiler extends SqlQueryCompiler<UpdateQueryBuilder>
 }
 
 // tslint:disable-next-line
-export interface DeleteQueryCompiler extends IWhereCompiler { }
-export class DeleteQueryCompiler extends SqlQueryCompiler<DeleteQueryBuilder>
+export interface SqlDeleteQueryCompiler extends IWhereCompiler { }
+export class SqlDeleteQueryCompiler extends SqlQueryCompiler<DeleteQueryBuilder>
 {
-
+ 
     @use(SqlWhereCompiler)
     /// @ts-ignore
     private this: this;
