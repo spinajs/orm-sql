@@ -23,6 +23,9 @@
     },
     "ordered-imports": {
       "severity": "off"
+    },
+    "variable-name":{
+      "severity": "off"
     }
   }
 }

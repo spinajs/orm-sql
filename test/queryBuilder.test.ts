@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import 'mocha';
-import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, OrmDriver } from '@spinajs/orm';
+import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, OrmDriver, ExistsQueryStatement, TableQueryCompiler, ColumnMethodStatement, ColumnRawStatement, WhereQueryStatement } from '@spinajs/orm';
 import { DI, IContainer } from '@spinajs/di';
 import { Configuration } from "@spinajs/configuration";
 import { join, normalize, resolve } from 'path';
@@ -8,8 +8,8 @@ import _ = require('lodash');
 import { SpinaJsDefaultLog, LogModule } from "@spinajs/log";
 import { SqlOrm } from '../src';
 import { BetweenStatement, ColumnStatement, DeleteQueryCompiler, InsertQueryCompiler, InStatement, RawQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, WhereStatement } from "@spinajs/orm";
-import { SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlSelectQueryCompiler, SqlUpdateQueryCompiler } from "./../src/compilers";
-import { SqlBetweenStatement, SqlColumnStatement, SqlInStatement, SqlRawStatement, SqlWhereStatement } from './../src/statements';
+import { SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlTableQueryCompiler } from "./../src/compilers";
+import { SqlBetweenStatement, SqlColumnStatement, SqlInStatement, SqlRawStatement, SqlWhereStatement, SqlExistsQueryStatement, SqlColumnMethodStatement, SqlColumnRawStatement, SqlWhereQueryStatement } from './../src/statements';
 
 
 export function dir(path: string) {
@@ -75,11 +75,16 @@ class FakeSqliteDriver extends OrmDriver {
         this.Container.register(SqlBetweenStatement).as(BetweenStatement);
         this.Container.register(SqlWhereStatement).as(WhereStatement);
         this.Container.register(SqlColumnStatement).as(ColumnStatement);
+        this.Container.register(SqlColumnMethodStatement).as(ColumnMethodStatement);
+        this.Container.register(SqlExistsQueryStatement).as(ExistsQueryStatement);
+        this.Container.register(SqlColumnRawStatement).as(ColumnRawStatement);
+        this.Container.register(SqlWhereQueryStatement).as(WhereQueryStatement);
 
         this.Container.register(SqlSelectQueryCompiler).as(SelectQueryCompiler);
         this.Container.register(SqlUpdateQueryCompiler).as(UpdateQueryCompiler);
         this.Container.register(SqlDeleteQueryCompiler).as(DeleteQueryCompiler);
         this.Container.register(SqlInsertQueryCompiler).as(InsertQueryCompiler);
+        this.Container.register(SqlTableQueryCompiler).as(TableQueryCompiler);
     }
 }
 
@@ -182,6 +187,19 @@ describe("Query builder generic", () => {
 
 describe("Where query builder", () => {
 
+    beforeEach(async () => {
+        DI.register(ConnectionConf).as(Configuration);
+        DI.register(SpinaJsDefaultLog).as(LogModule);
+        DI.register(FakeSqliteDriver).as("sqlite");
+
+        DI.resolve(LogModule);
+        await DI.resolve(SqlOrm);
+    });
+
+    afterEach(async () => {
+        DI.clear();
+    });
+
     it("clear where", () => {
         const result = sqb().select("*").from("users").where('id', "=", 1).clearWhere().toDB();
         expect(result.expression).to.equal("SELECT * FROM `users`");
@@ -206,19 +224,19 @@ describe("Where query builder", () => {
 
     it("where not in", () => {
         const result = sqb().select("*").from("users").whereNotIn('id', [1, 2, 3]).toDB();
-        expect(result.expression)("SELECT * FROM `users` WHERE `id` NOT IN (?,?,?)");
+        expect(result.expression).to.eq("SELECT * FROM `users` WHERE `id` NOT IN (?,?,?)");
         expect(result.bindings).to.be.an("array").to.include.members([1, 2, 3]);
     })
 
     it("where between", () => {
         const result = sqb().select("*").from("users").whereBetween('id', [1, 2]).toDB();
-        expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` BETWEEN (?,?)");
+        expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` BETWEEN ? AND ?");
         expect(result.bindings).to.be.an("array").to.include.members([1, 2]);
     })
 
     it("where not between", () => {
         const result = sqb().select("*").from("users").whereNotBetween('id', [1, 2]).toDB();
-        expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` NOT BETWEEN (?,?)");
+        expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` NOT BETWEEN ? AND ?");
         expect(result.bindings).to.be.an("array").to.include.members([1, 2]);
     })
 
@@ -293,6 +311,20 @@ describe("Where query builder", () => {
 
 
 describe("Delete query builder", () => {
+
+    beforeEach(async () => {
+        DI.register(ConnectionConf).as(Configuration);
+        DI.register(SpinaJsDefaultLog).as(LogModule);
+        DI.register(FakeSqliteDriver).as("sqlite");
+
+        DI.resolve(LogModule);
+        await DI.resolve(SqlOrm);
+    });
+
+    afterEach(async () => {
+        DI.clear();
+    });
+
     it("Simple delete", () => {
         let result = dqb().from("users").schema("spine").where("active", false).toDB();
         expect(result.expression).to.equal("DELETE FROM `spine`.`users` WHERE `active` = ?");
@@ -305,6 +337,19 @@ describe("Delete query builder", () => {
 });
 
 describe("Select query builder", () => {
+
+    beforeEach(async () => {
+        DI.register(ConnectionConf).as(Configuration);
+        DI.register(SpinaJsDefaultLog).as(LogModule);
+        DI.register(FakeSqliteDriver).as("sqlite");
+
+        DI.resolve(LogModule);
+        await DI.resolve(SqlOrm);
+    });
+
+    afterEach(async () => {
+        DI.clear();
+    });
 
     it("basic select", () => {
         const result = sqb().select("*").from("users").toDB();
@@ -443,6 +488,20 @@ describe("Select query builder", () => {
 
 
 describe("insert query builder", () => {
+
+    beforeEach(async () => {
+        DI.register(ConnectionConf).as(Configuration);
+        DI.register(SpinaJsDefaultLog).as(LogModule);
+        DI.register(FakeSqliteDriver).as("sqlite");
+
+        DI.resolve(LogModule);
+        await DI.resolve(SqlOrm);
+    });
+
+    afterEach(async () => {
+        DI.clear();
+    });
+
     it("simple insert", () => {
         const result = iqb().into("users").values({
             id: 1,
@@ -486,6 +545,19 @@ describe("insert query builder", () => {
 });
 
 describe("schema building", () => {
+
+    beforeEach(async () => {
+        DI.register(ConnectionConf).as(Configuration);
+        DI.register(SpinaJsDefaultLog).as(LogModule);
+        DI.register(FakeSqliteDriver).as("sqlite");
+
+        DI.resolve(LogModule);
+        await DI.resolve(SqlOrm);
+    });
+
+    afterEach(async () => {
+        DI.clear();
+    });
 
     it("column with one primary keys", () => {
         const result = schqb().createTable("users", (table: TableQueryBuilder) => {

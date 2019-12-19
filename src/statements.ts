@@ -1,5 +1,6 @@
+import { SqlWhereCompiler } from './compilers';
 import { NewInstance } from "@spinajs/di";
-import { BetweenStatement, ColumnStatement, InStatement, IQueryStatementResult, RawQueryStatement, WhereStatement } from "@spinajs/orm";
+import { BetweenStatement, ColumnStatement, ColumnRawStatement, InStatement, IQueryStatementResult, RawQueryStatement, WhereStatement, ExistsQueryStatement, ColumnMethodStatement, WhereQueryStatement } from "@spinajs/orm";
 
 @NewInstance()
 export class SqlRawStatement extends RawQueryStatement {
@@ -34,8 +35,7 @@ export class SqlWhereStatement extends WhereStatement {
 }
 
 @NewInstance()
-export class SqlInStatement extends InStatement
-{
+export class SqlInStatement extends InStatement {
     public build(): IQueryStatementResult {
         const exprr = this._not ? "NOT IN" : "IN";
 
@@ -47,8 +47,7 @@ export class SqlInStatement extends InStatement
 }
 
 @NewInstance()
-export class SqlColumnStatement extends ColumnStatement
-{
+export class SqlColumnStatement extends ColumnStatement {
     public build(): IQueryStatementResult {
         let exprr = "";
 
@@ -58,7 +57,7 @@ export class SqlColumnStatement extends ColumnStatement
 
             exprr = `\`${this._column}\``;
 
-            if (!this._alias) {
+            if (this._alias) {
                 exprr += ` as \`${this._alias}\``
             }
         }
@@ -69,4 +68,67 @@ export class SqlColumnStatement extends ColumnStatement
         }
     }
 }
- 
+
+@NewInstance()
+export class SqlColumnMethodStatement extends ColumnMethodStatement {
+    public build(): IQueryStatementResult {
+        let _exprr = "";
+
+        if (this.IsWildcard) {
+            _exprr = `${this._method}(${this._column})`;;
+        } else {
+            _exprr = `${this._method}(\`${this._column}\`)`;
+        }
+
+        if (this._alias) {
+            _exprr += ` as \`${this._alias}\``
+        }
+
+        return {
+            Bindings: [] as any[],
+            Statements: [_exprr]
+        }
+    }
+}
+
+@NewInstance()
+export class SqlColumnRawStatement extends ColumnRawStatement {
+    public build(): IQueryStatementResult {
+        return {
+            Bindings: this.RawQuery.Bindings,
+            Statements: [this.RawQuery.Query]
+        }
+    }
+}
+
+export class SqlWhereQueryStatement extends WhereQueryStatement
+{
+    public build() {
+        const _compiler = new SqlWhereCompiler();
+        const _result = _compiler.where(this._builder);
+
+        return {
+            Bindings: _result.bindings,
+            Statements: [`( ${_result.expression} )`]
+        }
+    }
+}
+
+@NewInstance()
+export class SqlExistsQueryStatement extends ExistsQueryStatement {
+    public build(): IQueryStatementResult {
+        let exprr = "";
+        const compiled = this._builder.toDB();
+
+        if (this._not) {
+            exprr += `NOT EXISTS ( ${compiled.expression} )`
+        } else {
+            exprr += `EXISTS ( ${compiled.expression} )`;
+        }
+
+        return {
+            Bindings: compiled.bindings,
+            Statements: [exprr]
+        };
+    }
+}
