@@ -49,7 +49,8 @@ class FakeSqliteDriver extends OrmDriver {
     }
 
     // tslint:disable-next-line: no-empty
-    public async ping(): Promise<void> {
+    public async ping(): Promise<boolean> {
+        return true;
     }
 
     // tslint:disable-next-line: no-empty
