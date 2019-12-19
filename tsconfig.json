@@ -16,14 +16,15 @@
         "declaration": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "typeRoots": ["node_modules/@types", "src/typings"]
-        
+        "typeRoots": [
+            "node_modules/@types",
+            "src/typings"
+        ]
     },
     "include": [
-        "src/**/*",
-        "test/**/*"
+        "src/**/*"
     ],
     "exclude": [
         "node_modules"
     ]
-}  
+}
