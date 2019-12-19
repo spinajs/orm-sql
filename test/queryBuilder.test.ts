@@ -1,12 +1,11 @@
 import { expect } from 'chai';
 import 'mocha';
-import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, OrmDriver, ExistsQueryStatement, TableQueryCompiler, ColumnMethodStatement, ColumnRawStatement, WhereQueryStatement } from '@spinajs/orm';
+import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, OrmDriver, ExistsQueryStatement, TableQueryCompiler, ColumnMethodStatement, ColumnRawStatement, WhereQueryStatement, Orm } from '@spinajs/orm';
 import { DI, IContainer } from '@spinajs/di';
 import { Configuration } from "@spinajs/configuration";
 import { join, normalize, resolve } from 'path';
 import _ = require('lodash');
 import { SpinaJsDefaultLog, LogModule } from "@spinajs/log";
-import { SqlOrm } from '../src';
 import { BetweenStatement, ColumnStatement, DeleteQueryCompiler, InsertQueryCompiler, InStatement, RawQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, WhereStatement } from "@spinajs/orm";
 import { SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlTableQueryCompiler } from "./../src/compilers";
 import { SqlBetweenStatement, SqlColumnStatement, SqlInStatement, SqlRawStatement, SqlWhereStatement, SqlExistsQueryStatement, SqlColumnMethodStatement, SqlColumnRawStatement, SqlWhereQueryStatement } from './../src/statements';
@@ -39,7 +38,7 @@ function schqb() {
 }
 
 function db() {
-    return DI.get(SqlOrm);
+    return DI.get(Orm);
 }
 
 // @ts-ignore
@@ -122,7 +121,7 @@ describe("Query builder generic", () => {
         DI.register(FakeSqliteDriver).as("sqlite");
 
         DI.resolve(LogModule);
-        await DI.resolve(SqlOrm);
+        await DI.resolve(Orm);
     });
 
     afterEach(async () => {
@@ -193,7 +192,7 @@ describe("Where query builder", () => {
         DI.register(FakeSqliteDriver).as("sqlite");
 
         DI.resolve(LogModule);
-        await DI.resolve(SqlOrm);
+        await DI.resolve(Orm);
     });
 
     afterEach(async () => {
@@ -318,7 +317,7 @@ describe("Delete query builder", () => {
         DI.register(FakeSqliteDriver).as("sqlite");
 
         DI.resolve(LogModule);
-        await DI.resolve(SqlOrm);
+        await DI.resolve(Orm);
     });
 
     afterEach(async () => {
@@ -344,7 +343,7 @@ describe("Select query builder", () => {
         DI.register(FakeSqliteDriver).as("sqlite");
 
         DI.resolve(LogModule);
-        await DI.resolve(SqlOrm);
+        await DI.resolve(Orm);
     });
 
     afterEach(async () => {
@@ -495,7 +494,7 @@ describe("insert query builder", () => {
         DI.register(FakeSqliteDriver).as("sqlite");
 
         DI.resolve(LogModule);
-        await DI.resolve(SqlOrm);
+        await DI.resolve(Orm);
     });
 
     afterEach(async () => {
@@ -552,7 +551,7 @@ describe("schema building", () => {
         DI.register(FakeSqliteDriver).as("sqlite");
 
         DI.resolve(LogModule);
-        await DI.resolve(SqlOrm);
+        await DI.resolve(Orm);
     });
 
     afterEach(async () => {
