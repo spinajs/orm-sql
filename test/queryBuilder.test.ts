@@ -267,7 +267,7 @@ describe("Where query builder", () => {
 
     it("where with nested expressions", () => {
 
-        let result = sqb().select("*").from("users").where(function () {
+        const result = sqb().select("*").from("users").where(function () {
             this.where("a", 1).where("b", 2);
         }).orWhere(function () {
             this.where("c", 1).where("d", 2);
@@ -277,13 +277,13 @@ describe("Where query builder", () => {
     });
 
     it("where RAW expressions", () => {
-        let result = sqb().select("*").from("users").where(RawQuery.create("foo = bar AND zar.id = tar.id")).toDB();
+        const result = sqb().select("*").from("users").where(RawQuery.create("foo = bar AND zar.id = tar.id")).toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` WHERE foo = bar AND zar.id = tar.id");
     });
 
     it("where explicit operator", () => {
 
-        let result = sqb().select("*").from("users").where("id", ">=", 1).toDB();
+        const result = sqb().select("*").from("users").where("id", ">=", 1).toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` >= ?");
 
         expect(() => {
@@ -292,7 +292,7 @@ describe("Where query builder", () => {
     });
 
     it("where object as argument", () => {
-        let result = sqb().select("*").from("users").where({
+        const result = sqb().select("*").from("users").where({
             id: 1,
             active: true
         }).toDB();
@@ -326,12 +326,12 @@ describe("Delete query builder", () => {
     });
 
     it("Simple delete", () => {
-        let result = dqb().from("users").schema("spine").where("active", false).toDB();
+        const result = dqb().from("users").schema("spine").where("active", false).toDB();
         expect(result.expression).to.equal("DELETE FROM `spine`.`users` WHERE `active` = ?");
     });
 
     it("Simple truncate", () => {
-        let result = dqb().from("users").schema("spine").truncate().toDB();
+        const result = dqb().from("users").schema("spine").truncate().toDB();
         expect(result.expression).to.equal("TRUNCATE TABLE `spine`.`users`");
     });
 });
@@ -405,11 +405,11 @@ describe("Select query builder", () => {
     })
 
     it("select with take & skip invalid args", () => {
-        expect(function () {
+        expect(() => {
             sqb().select("*").from("users").take(0)
         }).to.throw();
 
-        expect(function () {
+        expect(() => {
             sqb().select("*").from("users").skip(-1)
         }).to.throw();
     })
@@ -481,7 +481,7 @@ describe("Select query builder", () => {
     })
 
     it("select function with * column", () => {
-        let result = sqb().count("*").from("users").toDB().expression;
+        const result = sqb().count("*").from("users").toDB().expression;
         expect(result).to.equal("SELECT COUNT(*) FROM `users`");
     })
 });

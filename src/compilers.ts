@@ -444,16 +444,13 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
                 break;
         }
 
-        this.builder.Unsigned ? _stmt.push("UNSIGNED") : null;
-        this.builder.Charset ? _stmt.push(`CHARACTER SET '${this.builder.Charset}'`) : null;
-        this.builder.Collation ? _stmt.push(`COLLATE '${this.builder.Collation}'`) : null;
-        this.builder.NotNull ? _stmt.push("NOT NULL") : null;
-
-        const de = this._defaultCompiler();
-        de ? _stmt.push(de) : null;
-
-        this.builder.AutoIncrement ? _stmt.push("AUTO INCREMENT") : null;
-        this.builder.Comment ? _stmt.push(`COMMENT '${this.builder.Comment}'`) : null;
+        if (this.builder.Unsigned) { _stmt.push("UNSIGNED"); }
+        if (this.builder.Charset) { _stmt.push(`CHARACTER SET '${this.builder.Charset}'`); }
+        if (this.builder.Collation) { _stmt.push(`COLLATE '${this.builder.Collation}'`); }
+        if (this.builder.NotNull) { _stmt.push("NOT NULL"); }
+        if (this.builder.Default) { _stmt.push(this._defaultCompiler()); }
+        if(this.builder.AutoIncrement) {  _stmt.push("AUTO INCREMENT"); }
+        if(this.builder.Comment) { _stmt.push(`COMMENT '${this.builder.Comment}'`); }
 
 
 
