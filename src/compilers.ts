@@ -383,13 +383,13 @@ export class SqlTableQueryCompiler extends TableQueryCompiler implements SqlTabl
         }
     }
 
-    public _columns() {
+    protected _columns() {
         return this.builder.Columns.map((c) => {
             return this.container.resolve(ColumnQueryCompiler, [c]).compile().expression;
         }).join(",");
     }
 
-    public _primaryKeys() {
+    protected _primaryKeys() {
 
         const _keys = this.builder.Columns.filter(x => x.PrimaryKey).map(c => `\`${c.Name}\``).join(",");
 
@@ -401,7 +401,7 @@ export class SqlTableQueryCompiler extends TableQueryCompiler implements SqlTabl
 
     }
 
-    public _table() {
+    protected _table() {
         return `CREATE TABLE ${this.tableAliasCompiler(this.builder)}`;
     }
 
@@ -451,7 +451,7 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
         if (this.builder.Collation) { _stmt.push(`COLLATE '${this.builder.Collation}'`); }
         if (this.builder.NotNull) { _stmt.push("NOT NULL"); }
         if (this.builder.Default) { _stmt.push(this._defaultCompiler()); }
-        if(this.builder.AutoIncrement) {  _stmt.push(this.AutoIncrementStatement); }
+        if(this.builder.AutoIncrement) {  _stmt.push("AUTO_INCREMENT"); }
         if(this.builder.Comment) { _stmt.push(`COMMENT '${this.builder.Comment}'`); }
 
 
@@ -461,12 +461,8 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
             expression: _stmt.filter(x => !_.isEmpty(x)).join(" "),
         }
     }
-
-    protected get AutoIncrementStatement(){
-        return "AUTO_INCREMENT";
-    }
-
-    private _defaultCompiler() {
+ 
+    protected _defaultCompiler() {
         let _stmt = "";
 
         if (_.isNil(this.builder.Default) || (_.isString(this.builder.Default) && _.isEmpty(this.builder.Default.trim()))) {
