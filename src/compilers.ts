@@ -211,30 +211,30 @@ export class SqlUpdateQueryCompiler extends SqlQueryCompiler<UpdateQueryBuilder>
         const where = this.where(this._builder as IWhereBuilder);
 
         const bindings = [];
-        bindings.push(set.bindings);
+        bindings.push(...set.bindings);
         bindings.push(...where.bindings);
 
         return {
             bindings,
-            expression: table + set + where
+            expression: `${table} ${set.expression} WHERE ${where.expression}`
         }
     }
 
     protected set() {
 
-        const bindings = [];
-        let exprr = "";
+        let bindings : any[] = [] 
+        const exprr = [];
 
         for (const prop of Object.keys(this._builder.Value)) {
             const val = (this._builder.Value as any)[prop];
 
-            exprr += `\`${prop}\` = ?`
-            bindings.push(val);
+            exprr.push(`\`${prop}\` = ?`);
+            bindings = bindings.concat(val);
         }
 
         return {
             bindings,
-            expression: exprr
+            expression: exprr.join(",")
         }
     }
 

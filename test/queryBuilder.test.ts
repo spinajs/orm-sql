@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 import 'mocha';
-import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, OrmDriver, ExistsQueryStatement, TableQueryCompiler, ColumnMethodStatement, ColumnRawStatement, WhereQueryStatement, Orm } from '@spinajs/orm';
+import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, OrmDriver, ExistsQueryStatement, TableQueryCompiler, ColumnMethodStatement, ColumnRawStatement, WhereQueryStatement, Orm, ColumnQueryCompiler } from '@spinajs/orm';
 import { DI, IContainer } from '@spinajs/di';
 import { Configuration } from "@spinajs/configuration";
 import { join, normalize, resolve } from 'path';
 import _ = require('lodash');
 import { SpinaJsDefaultLog, LogModule } from "@spinajs/log";
 import { BetweenStatement, ColumnStatement, DeleteQueryCompiler, InsertQueryCompiler, InStatement, RawQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, WhereStatement } from "@spinajs/orm";
-import { SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlTableQueryCompiler } from "./../src/compilers";
+import { SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlTableQueryCompiler, SqlColumnQueryCompiler } from "./../src/compilers";
 import { SqlBetweenStatement, SqlColumnStatement, SqlInStatement, SqlRawStatement, SqlWhereStatement, SqlExistsQueryStatement, SqlColumnMethodStatement, SqlColumnRawStatement, SqlWhereQueryStatement } from './../src/statements';
 
 
@@ -85,6 +85,8 @@ class FakeSqliteDriver extends OrmDriver {
         this.Container.register(SqlDeleteQueryCompiler).as(DeleteQueryCompiler);
         this.Container.register(SqlInsertQueryCompiler).as(InsertQueryCompiler);
         this.Container.register(SqlTableQueryCompiler).as(TableQueryCompiler);
+        this.Container.register(SqlColumnQueryCompiler).as(ColumnQueryCompiler);
+
     }
 }
 
@@ -564,7 +566,7 @@ describe("schema building", () => {
             table.int("foo").notNull().primaryKey().autoIncrement()
         }).toDB();
 
-        expect(result.expression).to.equal("CREATE TABLE `users` (`foo` INT NOT NULL AUTO INCREMENT , PRIMARY KEY (`foo`))");
+        expect(result.expression).to.equal("CREATE TABLE `users` (`foo` INT NOT NULL AUTO_INCREMENT , PRIMARY KEY (`foo`))");
     })
 
 
@@ -575,7 +577,7 @@ describe("schema building", () => {
 
         }).toDB();
 
-        expect(result.expression).to.equal("CREATE TABLE `users` (`foo` INT NOT NULL AUTO INCREMENT,`bar` INT NOT NULL AUTO INCREMENT , PRIMARY KEY (`foo`,`bar`))");
+        expect(result.expression).to.equal("CREATE TABLE `users` (`foo` INT NOT NULL AUTO_INCREMENT,`bar` INT NOT NULL AUTO_INCREMENT , PRIMARY KEY (`foo`,`bar`))");
     })
 
     it("column with charset", () => {
@@ -620,7 +622,7 @@ describe("schema building", () => {
             table.int("foo").unsigned().autoIncrement();
         }).toDB();
 
-        expect(result.expression).to.contain("`foo` INT UNSIGNED AUTO INCREMENT");
+        expect(result.expression).to.contain("`foo` INT UNSIGNED AUTO_INCREMENT");
     })
 
     it("column with unsigned", () => {
