@@ -449,7 +449,7 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
         if (this.builder.Collation) { _stmt.push(`COLLATE '${this.builder.Collation}'`); }
         if (this.builder.NotNull) { _stmt.push("NOT NULL"); }
         if (this.builder.Default) { _stmt.push(this._defaultCompiler()); }
-        if(this.builder.AutoIncrement) {  _stmt.push("AUTO INCREMENT"); }
+        if(this.builder.AutoIncrement) {  _stmt.push(this.AutoIncrementStatement); }
         if(this.builder.Comment) { _stmt.push(`COMMENT '${this.builder.Comment}'`); }
 
 
@@ -458,6 +458,10 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
             bindings: [],
             expression: _stmt.filter(x => !_.isEmpty(x)).join(" "),
         }
+    }
+
+    protected get AutoIncrementStatement(){
+        return "AUTO_INCREMENT";
     }
 
     private _defaultCompiler() {
