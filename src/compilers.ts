@@ -1,7 +1,7 @@
 import { InvalidOperationException } from "@spinajs/exceptions";
 import { ColumnStatement, DeleteQueryBuilder, IColumnsBuilder, IColumnsCompiler, ICompilerOutput, ILimitBuilder, ILimitCompiler, InsertQueryBuilder, IOrderByBuilder, IOrderByCompiler, IWhereBuilder, IWhereCompiler, OrderByBuilder, QueryBuilder, SelectQueryBuilder, UpdateQueryBuilder, SelectQueryCompiler, TableQueryCompiler, TableQueryBuilder, ColumnQueryBuilder, ColumnQueryCompiler, RawQuery, IQueryBuilder } from "@spinajs/orm";
 import { use } from "typescript-mix";
-import { NewInstance } from "@spinajs/di";
+import { NewInstance, Inject, Container } from "@spinajs/di";
 import _ = require("lodash");
 
 interface ITableAliasCompiler {
@@ -360,13 +360,14 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
 export interface SqlTableQueryCompiler extends ITableAliasCompiler { }
 
 @NewInstance()
+@Inject(Container)
 export class SqlTableQueryCompiler extends TableQueryCompiler implements SqlTableQueryCompiler {
 
     @use(TableAliasCompiler)
     /// @ts-ignore
     private this: this;
 
-    constructor(protected builder: TableQueryBuilder) {
+    constructor(protected container : Container, protected builder: TableQueryBuilder) {
         super();
     }
 
@@ -384,7 +385,7 @@ export class SqlTableQueryCompiler extends TableQueryCompiler implements SqlTabl
 
     public _columns() {
         return this.builder.Columns.map((c) => {
-            return new SqlColumnQueryCompiler(c).compile().expression;
+            return this.container.resolve(ColumnQueryCompiler, [c]).compile().expression;
         }).join(",");
     }
 
@@ -406,6 +407,7 @@ export class SqlTableQueryCompiler extends TableQueryCompiler implements SqlTabl
 
 }
 
+@NewInstance()
 export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
 
     constructor(protected builder: ColumnQueryBuilder) {
