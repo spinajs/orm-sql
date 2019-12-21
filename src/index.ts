@@ -9,6 +9,8 @@ export * from "./statements";
 export abstract class SqlDriver extends OrmDriver {
     
     public resolve(container: IContainer) {
+
+        super.resolve(container);
         this.Container = container.child();
 
 
