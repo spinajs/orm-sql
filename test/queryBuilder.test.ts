@@ -54,12 +54,13 @@ class FakeSqliteDriver extends OrmDriver {
     }
 
     // tslint:disable-next-line: no-empty
-    public async connect(): Promise<void> {
-
+    public async connect(): Promise<OrmDriver> {
+        return this;
     }
 
     // tslint:disable-next-line: no-empty
-    public async disconnect(): Promise<void> {
+    public async disconnect(): Promise<OrmDriver> {
+        return this;
     }
 
     public tableInfo(_table: string, _schema: string): Promise<IColumnDescriptor[]> {
