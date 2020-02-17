@@ -101,15 +101,14 @@ export class SqlColumnRawStatement extends ColumnRawStatement {
     }
 }
 
-export class SqlWhereQueryStatement extends WhereQueryStatement
-{
+export class SqlWhereQueryStatement extends WhereQueryStatement {
     public build() {
         const _compiler = new SqlWhereCompiler();
         const _result = _compiler.where(this._builder);
 
         return {
             Bindings: _result.bindings,
-            Statements: [`( ${_result.expression} )`]
+            Statements: _result.expression && _result.expression === "" ? [`( ${_result.expression} )`] : []
         }
     }
 }

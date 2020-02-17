@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import 'mocha';
-import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, OrmDriver, ExistsQueryStatement, TableQueryCompiler, ColumnMethodStatement, ColumnRawStatement, WhereQueryStatement, Orm, ColumnQueryCompiler, OrderByQueryCompiler } from '@spinajs/orm';
+import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, OrmDriver, ExistsQueryStatement, TableQueryCompiler, ColumnMethodStatement, ColumnRawStatement, WhereQueryStatement, Orm, ColumnQueryCompiler, OrderByQueryCompiler, IWhereBuilder } from '@spinajs/orm';
 import { DI, IContainer } from '@spinajs/di';
 import { Configuration } from "@spinajs/configuration";
 import { join, normalize, resolve } from 'path';
@@ -419,6 +419,16 @@ describe("Select query builder", () => {
         }).to.throw();
     })
 
+    it("where empty function", () => {
+        // tslint:disable-next-line: only-arrow-functions
+        // tslint:disable-next-line: no-empty
+        const result = sqb().select("*").from("users").where(function (_builder: IWhereBuilder) {
+
+        }).toDB();
+
+        expect(result.expression).to.eq("SELECT & FROM `users`");
+    })
+
     it("select with order by", () => {
         const result = sqb().select("*").from("users").orderByDescending("name").toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` ORDER BY ? ?");
@@ -651,6 +661,8 @@ describe("schema building", () => {
 
         expect(result.expression).to.contain("`foo` TEXT NOT NULL");
     })
+
+
 
     it("column types", () => {
         const result = schqb().createTable("users", (table: TableQueryBuilder) => {
