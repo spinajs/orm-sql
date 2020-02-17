@@ -1,7 +1,7 @@
-import { OrmDriver, InStatement, RawQueryStatement, BetweenStatement, WhereStatement, ColumnStatement, ColumnMethodStatement, ExistsQueryStatement, ColumnRawStatement, WhereQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, DeleteQueryCompiler, InsertQueryCompiler, TableQueryCompiler } from "@spinajs/orm";
+import { OrmDriver, InStatement, RawQueryStatement, BetweenStatement, WhereStatement, ColumnStatement, ColumnMethodStatement, ExistsQueryStatement, ColumnRawStatement, WhereQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, DeleteQueryCompiler, InsertQueryCompiler, TableQueryCompiler, OrderByQueryCompiler } from "@spinajs/orm";
 import { IContainer } from "@spinajs/di";
 import { SqlInStatement, SqlRawStatement, SqlBetweenStatement, SqlWhereStatement, SqlColumnStatement, SqlColumnMethodStatement, SqlExistsQueryStatement, SqlColumnRawStatement, SqlWhereQueryStatement } from "./statements";
-import { SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlTableQueryCompiler } from "./compilers";
+import { SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlTableQueryCompiler, SqlOrderQueryByCompiler } from "./compilers";
 
 export * from "./compilers";
 export * from "./statements";
@@ -29,5 +29,7 @@ export abstract class SqlDriver extends OrmDriver {
         this.Container.register(SqlDeleteQueryCompiler).as(DeleteQueryCompiler);
         this.Container.register(SqlInsertQueryCompiler).as(InsertQueryCompiler);
         this.Container.register(SqlTableQueryCompiler).as(TableQueryCompiler);
+        this.Container.register(SqlOrderQueryByCompiler).as(OrderByQueryCompiler);
+
     }
 }

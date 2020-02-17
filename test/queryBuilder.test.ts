@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 import 'mocha';
-import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, OrmDriver, ExistsQueryStatement, TableQueryCompiler, ColumnMethodStatement, ColumnRawStatement, WhereQueryStatement, Orm, ColumnQueryCompiler } from '@spinajs/orm';
+import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, OrmDriver, ExistsQueryStatement, TableQueryCompiler, ColumnMethodStatement, ColumnRawStatement, WhereQueryStatement, Orm, ColumnQueryCompiler, OrderByQueryCompiler } from '@spinajs/orm';
 import { DI, IContainer } from '@spinajs/di';
 import { Configuration } from "@spinajs/configuration";
 import { join, normalize, resolve } from 'path';
 import _ = require('lodash');
 import { SpinaJsDefaultLog, LogModule } from "@spinajs/log";
 import { BetweenStatement, ColumnStatement, DeleteQueryCompiler, InsertQueryCompiler, InStatement, RawQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, WhereStatement } from "@spinajs/orm";
-import { SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlTableQueryCompiler, SqlColumnQueryCompiler } from "./../src/compilers";
+import { SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlTableQueryCompiler, SqlColumnQueryCompiler, SqlOrderQueryByCompiler } from "./../src/compilers";
 import { SqlBetweenStatement, SqlColumnStatement, SqlInStatement, SqlRawStatement, SqlWhereStatement, SqlExistsQueryStatement, SqlColumnMethodStatement, SqlColumnRawStatement, SqlWhereQueryStatement } from './../src/statements';
 
 
@@ -87,6 +87,8 @@ class FakeSqliteDriver extends OrmDriver {
         this.Container.register(SqlInsertQueryCompiler).as(InsertQueryCompiler);
         this.Container.register(SqlTableQueryCompiler).as(TableQueryCompiler);
         this.Container.register(SqlColumnQueryCompiler).as(ColumnQueryCompiler);
+        this.Container.register(SqlOrderQueryByCompiler).as(OrderByQueryCompiler);
+
 
     }
 }

@@ -1,7 +1,7 @@
 import { InvalidOperationException } from "@spinajs/exceptions";
-import { ColumnStatement, DeleteQueryBuilder, IColumnsBuilder, IColumnsCompiler, ICompilerOutput, ILimitBuilder, ILimitCompiler, InsertQueryBuilder, IOrderByBuilder, IOrderByCompiler, IWhereBuilder, IWhereCompiler, OrderByBuilder, QueryBuilder, SelectQueryBuilder, UpdateQueryBuilder, SelectQueryCompiler, TableQueryCompiler, TableQueryBuilder, ColumnQueryBuilder, ColumnQueryCompiler, RawQuery, IQueryBuilder } from "@spinajs/orm";
+import { ColumnStatement, DeleteQueryBuilder, IColumnsBuilder, IColumnsCompiler, ICompilerOutput, ILimitBuilder, ILimitCompiler, InsertQueryBuilder, IOrderByBuilder, IWhereBuilder, IWhereCompiler, OrderByBuilder, QueryBuilder, SelectQueryBuilder, UpdateQueryBuilder, SelectQueryCompiler, TableQueryCompiler, TableQueryBuilder, ColumnQueryBuilder, ColumnQueryCompiler, RawQuery, IQueryBuilder, OrderByQueryCompiler } from "@spinajs/orm";
 import { use } from "typescript-mix";
-import { NewInstance, Inject, Container } from "@spinajs/di";
+import { NewInstance, Inject, Container, Autoinject } from "@spinajs/di";
 import _ = require("lodash");
 
 interface ITableAliasCompiler {
@@ -46,9 +46,21 @@ export abstract class SqlQueryCompiler<T extends QueryBuilder> extends SelectQue
 }
 
 @NewInstance()
-export class SqlOrderByCompiler implements IOrderByCompiler {
-    public sort(builder: OrderByBuilder): ICompilerOutput {
-        const sort = builder.getSort();
+export class SqlOrderQueryByCompiler extends OrderByQueryCompiler {
+    protected _builder: OrderByBuilder;
+
+    constructor(builder: OrderByBuilder) {
+        super();
+
+        if (!builder) {
+            throw new InvalidOperationException('builder cannot be null or undefined');
+        }
+
+        this._builder = builder;
+    }
+
+    public compile(): ICompilerOutput {
+        const sort = this._builder.getSort();
         let stmt = '';
         const bindings = [];
 
@@ -133,14 +145,17 @@ export class SqlWhereCompiler implements IWhereCompiler {
 
 
 // tslint:disable-next-line
-export interface SqlSelectQueryCompiler extends IWhereCompiler, ILimitCompiler, IOrderByCompiler, IColumnsCompiler, ITableAliasCompiler { }
+export interface SqlSelectQueryCompiler extends IWhereCompiler, ILimitCompiler, IColumnsCompiler, ITableAliasCompiler { }
 
 @NewInstance()
 export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder> {
 
-    @use(SqlWhereCompiler, SqlOrderByCompiler, SqlLimitCompiler, SqlColumnsCompiler, TableAliasCompiler)
+    @use(SqlWhereCompiler, SqlLimitCompiler, SqlColumnsCompiler, TableAliasCompiler)
     /// @ts-ignore
     private this: this;
+
+    @Autoinject()
+    private Container: Container;
 
     constructor(builder: SelectQueryBuilder) {
         super(builder);
@@ -165,6 +180,13 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
             bindings,
             expression: expression.trim()
         }
+
+
+    }
+
+    protected sort(builder: IOrderByBuilder) {
+        const compiler = this.Container.resolve<OrderByQueryCompiler>(OrderByQueryCompiler, [builder]);
+        return compiler.compile();
     }
 
 
@@ -222,7 +244,7 @@ export class SqlUpdateQueryCompiler extends SqlQueryCompiler<UpdateQueryBuilder>
 
     protected set() {
 
-        let bindings : any[] = [] 
+        let bindings: any[] = []
         const exprr = [];
 
         for (const prop of Object.keys(this._builder.Value)) {
@@ -367,7 +389,7 @@ export class SqlTableQueryCompiler extends TableQueryCompiler implements SqlTabl
     /// @ts-ignore
     private this: this;
 
-    constructor(protected container : Container, protected builder: TableQueryBuilder) {
+    constructor(protected container: Container, protected builder: TableQueryBuilder) {
         super();
     }
 
@@ -451,8 +473,8 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
         if (this.builder.Collation) { _stmt.push(`COLLATE '${this.builder.Collation}'`); }
         if (this.builder.NotNull) { _stmt.push("NOT NULL"); }
         if (this.builder.Default) { _stmt.push(this._defaultCompiler()); }
-        if(this.builder.AutoIncrement) {  _stmt.push("AUTO_INCREMENT"); }
-        if(this.builder.Comment) { _stmt.push(`COMMENT '${this.builder.Comment}'`); }
+        if (this.builder.AutoIncrement) { _stmt.push("AUTO_INCREMENT"); }
+        if (this.builder.Comment) { _stmt.push(`COMMENT '${this.builder.Comment}'`); }
 
 
 
@@ -461,7 +483,7 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
             expression: _stmt.filter(x => !_.isEmpty(x)).join(" "),
         }
     }
- 
+
     protected _defaultCompiler() {
         let _stmt = "";
 
