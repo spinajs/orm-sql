@@ -426,7 +426,7 @@ describe("Select query builder", () => {
 
         }).toDB();
 
-        expect(result.expression).to.eq("SELECT & FROM `users`");
+        expect(result.expression).to.eq("SELECT * FROM `users`");
     })
 
     it("select with order by", () => {

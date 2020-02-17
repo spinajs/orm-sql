@@ -108,7 +108,7 @@ export class SqlWhereQueryStatement extends WhereQueryStatement {
 
         return {
             Bindings: _result.bindings,
-            Statements: _result.expression && _result.expression === "" ? [`( ${_result.expression} )`] : []
+            Statements: _result.expression && _result.expression !== "" ? [`( ${_result.expression} )`] : []
         }
     }
 }
