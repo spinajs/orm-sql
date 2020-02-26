@@ -1,6 +1,7 @@
 import { SqlWhereCompiler } from './compilers';
 import { NewInstance } from "@spinajs/di";
 import { BetweenStatement, ColumnStatement, ColumnRawStatement, InStatement, IQueryStatementResult, RawQueryStatement, WhereStatement, ExistsQueryStatement, ColumnMethodStatement, WhereQueryStatement } from "@spinajs/orm";
+import { WhereOperators } from '@spinajs/orm/lib/enums';
 
 @NewInstance()
 export class SqlRawStatement extends RawQueryStatement {
@@ -27,9 +28,11 @@ export class SqlBetweenStatement extends BetweenStatement {
 @NewInstance()
 export class SqlWhereStatement extends WhereStatement {
     public build(): IQueryStatementResult {
+
+        const binding = this._operator === WhereOperators.NOT_NULL || this._operator === WhereOperators.NULL ? "" : " ?";
         return {
             Bindings: [this._value],
-            Statements: [`\`${this._column}\` ${this._operator.toUpperCase()} ?`]
+            Statements: [`\`${this._column}\` ${this._operator.toUpperCase()}${binding}`]
         }
     }
 }

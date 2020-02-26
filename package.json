@@ -1,6 +1,6 @@
 {
   "name": "@spinajs/orm-sql",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "SpinaJS orm basic sql language support. Use it as base for specific db drivers",
   "main": "lib/index.js",
   "private": false,

@@ -1,15 +1,12 @@
 import { expect } from 'chai';
 import 'mocha';
-import { IColumnDescriptor, SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, OrmDriver, ExistsQueryStatement, TableQueryCompiler, ColumnMethodStatement, ColumnRawStatement, WhereQueryStatement, Orm, ColumnQueryCompiler, OrderByQueryCompiler, IWhereBuilder } from '@spinajs/orm';
-import { DI, IContainer } from '@spinajs/di';
+import { SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, Orm, IWhereBuilder } from '@spinajs/orm';
+import { DI } from '@spinajs/di';
 import { Configuration } from "@spinajs/configuration";
 import { join, normalize, resolve } from 'path';
-import _ = require('lodash');
 import { SpinaJsDefaultLog, LogModule } from "@spinajs/log";
-import { BetweenStatement, ColumnStatement, DeleteQueryCompiler, InsertQueryCompiler, InStatement, RawQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, WhereStatement } from "@spinajs/orm";
-import { SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlTableQueryCompiler, SqlColumnQueryCompiler, SqlOrderQueryByCompiler } from "./../src/compilers";
-import { SqlBetweenStatement, SqlColumnStatement, SqlInStatement, SqlRawStatement, SqlWhereStatement, SqlExistsQueryStatement, SqlColumnMethodStatement, SqlColumnRawStatement, SqlWhereQueryStatement } from './../src/statements';
-
+import { ConnectionConf, FakeSqliteDriver } from './fixture';
+ 
 
 export function dir(path: string) {
     return resolve(normalize(join(__dirname, path)));
@@ -41,81 +38,7 @@ function db() {
     return DI.get(Orm);
 }
 
-// @ts-ignore
-class FakeSqliteDriver extends OrmDriver {
 
-    public async execute(_stmt: string | object, _params?: any[]): Promise<any[] | any> {
-        return true;
-    }
-
-    // tslint:disable-next-line: no-empty
-    public async ping(): Promise<boolean> {
-        return true;
-    }
-
-    // tslint:disable-next-line: no-empty
-    public async connect(): Promise<OrmDriver> {
-        return this;
-    }
-
-    // tslint:disable-next-line: no-empty
-    public async disconnect(): Promise<OrmDriver> {
-        return this;
-    }
-
-    public tableInfo(_table: string, _schema: string): Promise<IColumnDescriptor[]> {
-        return null;
-    }
-
-    public resolve(container: IContainer) {
-        this.Container = container.child();
-
-
-        this.Container.register(SqlInStatement).as(InStatement);
-        this.Container.register(SqlRawStatement).as(RawQueryStatement);
-        this.Container.register(SqlBetweenStatement).as(BetweenStatement);
-        this.Container.register(SqlWhereStatement).as(WhereStatement);
-        this.Container.register(SqlColumnStatement).as(ColumnStatement);
-        this.Container.register(SqlColumnMethodStatement).as(ColumnMethodStatement);
-        this.Container.register(SqlExistsQueryStatement).as(ExistsQueryStatement);
-        this.Container.register(SqlColumnRawStatement).as(ColumnRawStatement);
-        this.Container.register(SqlWhereQueryStatement).as(WhereQueryStatement);
-
-        this.Container.register(SqlSelectQueryCompiler).as(SelectQueryCompiler);
-        this.Container.register(SqlUpdateQueryCompiler).as(UpdateQueryCompiler);
-        this.Container.register(SqlDeleteQueryCompiler).as(DeleteQueryCompiler);
-        this.Container.register(SqlInsertQueryCompiler).as(InsertQueryCompiler);
-        this.Container.register(SqlTableQueryCompiler).as(TableQueryCompiler);
-        this.Container.register(SqlColumnQueryCompiler).as(ColumnQueryCompiler);
-        this.Container.register(SqlOrderQueryByCompiler).as(OrderByQueryCompiler);
-
-
-    }
-}
-
-export class ConnectionConf extends Configuration {
-
-    protected conf = {
-        system: {
-            dirs: {
-                models: [dir("./mocks/models")],
-            }
-        },
-        db: {
-            connections: [
-                {
-                    Driver: "sqlite",
-                    Filename: "foo.sqlite",
-                    Name: "sqlite"
-                }
-            ]
-        }
-    }
-
-    public get(path: string[], defaultValue?: any): any {
-        return _.get(this.conf, path, defaultValue);
-    }
-}
 
 
 
