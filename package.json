@@ -37,7 +37,7 @@
   },
   "homepage": "https://github.com/spinajs/orm-sql#readme",
   "dependencies": {
-    "@spinajs/configuration": "^1.0.4",
+    "@spinajs/configuration": "^1.0.5",
     "@spinajs/di": "^1.0.7",
     "@spinajs/orm": "^1.0.15",
     "typescript-mix": "^3.1.3"
