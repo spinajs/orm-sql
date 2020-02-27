@@ -316,10 +316,12 @@ describe("Select query builder", () => {
     })
 
     it("select first", () => {
-        const result = sqb().select("*").from("users").first().toDB();
+        const result = sqb().select("*").from("users");
 
-        expect(result.expression).to.equal("SELECT * FROM `users` LIMIT ?");
-        expect(result.bindings).to.be.an("array").to.include(1);
+        result.first();
+
+        expect(result.toDB().expression).to.equal("SELECT * FROM `users` LIMIT ?");
+        expect(result.toDB().bindings).to.be.an("array").to.include(1);
     })
 
     it("select with limit & skip", () => {
