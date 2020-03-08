@@ -325,6 +325,17 @@ export class SqlDeleteQueryCompiler extends SqlQueryCompiler<DeleteQueryBuilder>
     }
 }
 
+export class SqlOnDuplicateQueryCompiler extends SqlQueryCompiler<OnDuplicateQueryBuilder>
+{
+    public compile(){
+
+        const columns = this._builder.
+        return {
+            expression: "ON DUPLICATE KEY UPDATE "
+        }
+    }
+}
+
 @NewInstance()
 export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder> {
 
@@ -333,11 +344,16 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
         const into = this.into();
         const columns = this.columns();
         const values = this.values();
+        const onDuplicate = this.onDuplicate();
 
         return {
             bindings: values.bindings,
             expression: into + " " + columns + " " + values.data
         }
+    }
+
+    protected onDuplicate(){
+        const compiler = this.container.resolve(OnDuplicateQueryCompiler, [this.]).compile()
     }
 
     protected values() {
