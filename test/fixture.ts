@@ -1,4 +1,6 @@
-import { OrmDriver, IColumnDescriptor, InStatement, RawQueryStatement, BetweenStatement, WhereStatement, ColumnStatement, ColumnMethodStatement, ExistsQueryStatement, ColumnRawStatement, WhereQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, DeleteQueryCompiler, InsertQueryCompiler, TableQueryCompiler, ColumnQueryCompiler, OrderByQueryCompiler } from "@spinajs/orm";
+import { SqlJoinStatement } from './../src/statements';
+import { SqlOnDuplicateQueryCompiler } from './../src/compilers';
+import { OrmDriver, IColumnDescriptor, InStatement, RawQueryStatement, BetweenStatement, WhereStatement, ColumnStatement, ColumnMethodStatement, ExistsQueryStatement, ColumnRawStatement, WhereQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, DeleteQueryCompiler, InsertQueryCompiler, TableQueryCompiler, ColumnQueryCompiler, OrderByQueryCompiler, OnDuplicateQueryCompiler, JoinStatement } from "@spinajs/orm";
 import { IContainer } from "@spinajs/di";
 import { SqlInStatement, SqlRawStatement, SqlBetweenStatement, SqlWhereStatement, SqlColumnStatement, SqlColumnMethodStatement, SqlExistsQueryStatement, SqlColumnRawStatement, SqlWhereQueryStatement } from "../src/statements";
 import { SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlTableQueryCompiler, SqlColumnQueryCompiler, SqlOrderQueryByCompiler } from "../src/compilers";
@@ -40,6 +42,7 @@ export class FakeSqliteDriver extends OrmDriver {
         this.Container.register(SqlRawStatement).as(RawQueryStatement);
         this.Container.register(SqlBetweenStatement).as(BetweenStatement);
         this.Container.register(SqlWhereStatement).as(WhereStatement);
+        this.Container.register(SqlJoinStatement).as(JoinStatement);
         this.Container.register(SqlColumnStatement).as(ColumnStatement);
         this.Container.register(SqlColumnMethodStatement).as(ColumnMethodStatement);
         this.Container.register(SqlExistsQueryStatement).as(ExistsQueryStatement);
@@ -53,6 +56,8 @@ export class FakeSqliteDriver extends OrmDriver {
         this.Container.register(SqlTableQueryCompiler).as(TableQueryCompiler);
         this.Container.register(SqlColumnQueryCompiler).as(ColumnQueryCompiler);
         this.Container.register(SqlOrderQueryByCompiler).as(OrderByQueryCompiler);
+        this.Container.register(SqlOnDuplicateQueryCompiler).as(OnDuplicateQueryCompiler);
+
 
 
     }

@@ -6,7 +6,7 @@ import { Configuration } from "@spinajs/configuration";
 import { join, normalize, resolve } from 'path';
 import { SpinaJsDefaultLog, LogModule } from "@spinajs/log";
 import { ConnectionConf, FakeSqliteDriver } from './fixture';
- 
+
 
 export function dir(path: string) {
     return resolve(normalize(join(__dirname, path)));
@@ -37,10 +37,6 @@ function schqb() {
 function db() {
     return DI.get(Orm);
 }
-
-
-
-
 
 describe("Query builder generic", () => {
 
@@ -112,6 +108,68 @@ describe("Query builder generic", () => {
         }).to.throw();
     })
 })
+
+describe("Where query builder", () => {
+
+    
+    beforeEach(async () => {
+        DI.register(ConnectionConf).as(Configuration);
+        DI.register(SpinaJsDefaultLog).as(LogModule);
+        DI.register(FakeSqliteDriver).as("sqlite");
+
+        DI.resolve(LogModule);
+        await DI.resolve(Orm);
+    });
+
+    afterEach(async () => {
+        DI.clear();
+    });
+
+    it("left join", () => {
+        const result = sqb().select("*").from("users").leftJoin("adresses","addressId", "id").toDB();
+        expect(result.expression).to.equal("SELECT * FROM `users` LEFT JOIN `adresses` ON id = addressId");
+    })
+
+    it("right join", () => {
+        const result = sqb().select("*").from("users").rightJoin("adresses","addressId", "id").toDB();
+        expect(result.expression).to.equal("SELECT * FROM `users` RIGHT JOIN `adresses` ON id = addressId");
+    })
+
+    it("left outer join", () => {
+        const result = sqb().select("*").from("users").leftOuterJoin("adresses","addressId", "id").toDB();
+        expect(result.expression).to.equal("SELECT * FROM `users` LEFT OUTER JOIN `adresses` ON id = addressId");
+    })
+
+    it("inner join", () => {
+        const result = sqb().select("*").from("users").innerJoin("adresses","addressId", "id").toDB();
+        expect(result.expression).to.equal("SELECT * FROM `users` INNER JOIN `adresses` ON id = addressId");
+    })
+
+    it("right outer join", () => {
+        const result = sqb().select("*").from("users").rightOuterJoin("adresses","addressId", "id").toDB();
+        expect(result.expression).to.equal("SELECT * FROM `users` RIGHT OUTER JOIN `adresses` ON id = addressId");
+    })
+
+    it("full outer join", () => {
+        const result = sqb().select("*").from("users").fullOuterJoin("adresses","addressId", "id").toDB();
+        expect(result.expression).to.equal("SELECT * FROM `users` FULL OUTER JOIN `adresses` ON id = addressId");
+    })
+ 
+    it("cross join", () => {
+        const result = sqb().select("*").from("users").crossJoin("adresses","addressId", "id").toDB();
+        expect(result.expression).to.equal("SELECT * FROM `users` CROSS JOIN `adresses` ON id = addressId");
+    })
+
+    it("multiple joins", () => {
+        const result = sqb().select("*").from("users").leftJoin("adresses","addressId", "id").leftJoin("account", "accountId","id").toDB();
+        expect(result.expression).to.equal("SELECT * FROM `users` LEFT JOIN `adresses` ON id = addressId LEFT JOIN `account` ON id = accountId");
+    })
+
+    it("raw query joins", () => {
+        const result = sqb().select("*").from("users").leftJoin(new RawQuery("client ON foo=bar")).toDB();
+        expect(result.expression).to.equal("SELECT * FROM `users` LEFT JOIN client ON foo=bar");
+    })
+});
 
 describe("Where query builder", () => {
 
@@ -482,6 +540,17 @@ describe("insert query builder", () => {
         expect(result.expression).to.equal("INSERT INTO `users` (`id`,`active`,`email`) VALUES (?,DEFAULT,?),(?,?,?)");
         expect(result.bindings).to.be.an("array").to.include.members([1, "spine@spine.pl", 2, true, "spine2@spine.pl"]);
     })
+
+    it("insert with on duplicate", () => {
+
+        const result = iqb().into("users").values({
+            id: 1, active: true, email: "spine@spine.pl"
+        }).onDuplicate().update(["email", "active"]).toDB();
+
+
+        expect(result.expression).to.equal("INSERT INTO `users` (`id`,`active`,`email`) VALUES (?,?,?) ON DUPLICATE KEY UPDATE `email` = `?`,`active` = `?`");
+        expect(result.bindings).to.be.an("array").to.include.members([1, true, "spine@spine.pl", "spine@spine.pl", true]);
+    });
 });
 
 describe("schema building", () => {

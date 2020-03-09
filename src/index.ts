@@ -1,6 +1,6 @@
-import { OrmDriver, InStatement, RawQueryStatement, BetweenStatement, WhereStatement, ColumnStatement, ColumnMethodStatement, ExistsQueryStatement, ColumnRawStatement, WhereQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, DeleteQueryCompiler, InsertQueryCompiler, TableQueryCompiler, OrderByQueryCompiler } from "@spinajs/orm";
+import { OrmDriver, InStatement, RawQueryStatement, BetweenStatement, WhereStatement, ColumnStatement, ColumnMethodStatement, ExistsQueryStatement, ColumnRawStatement, WhereQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, DeleteQueryCompiler, InsertQueryCompiler, TableQueryCompiler, OrderByQueryCompiler, OnDuplicateQueryCompiler, JoinStatement } from "@spinajs/orm";
 import { IContainer } from "@spinajs/di";
-import { SqlInStatement, SqlRawStatement, SqlBetweenStatement, SqlWhereStatement, SqlColumnStatement, SqlColumnMethodStatement, SqlExistsQueryStatement, SqlColumnRawStatement, SqlWhereQueryStatement } from "./statements";
+import { SqlInStatement, SqlRawStatement, SqlBetweenStatement, SqlWhereStatement, SqlColumnStatement, SqlColumnMethodStatement, SqlExistsQueryStatement, SqlColumnRawStatement, SqlWhereQueryStatement, SqlJoinStatement } from "./statements";
 import { SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlTableQueryCompiler, SqlOrderQueryByCompiler, SqlOnDuplicateQueryCompiler } from "./compilers";
 
 export * from "./compilers";
@@ -19,6 +19,7 @@ export abstract class SqlDriver extends OrmDriver {
         this.Container.register(SqlBetweenStatement).as(BetweenStatement);
         this.Container.register(SqlWhereStatement).as(WhereStatement);
         this.Container.register(SqlColumnStatement).as(ColumnStatement);
+        this.Container.register(SqlJoinStatement).as(JoinStatement);
         this.Container.register(SqlColumnMethodStatement).as(ColumnMethodStatement);
         this.Container.register(SqlExistsQueryStatement).as(ExistsQueryStatement);
         this.Container.register(SqlColumnRawStatement).as(ColumnRawStatement);

@@ -1,5 +1,5 @@
 import { InvalidOperationException } from "@spinajs/exceptions";
-import { ColumnStatement, DeleteQueryBuilder, IColumnsBuilder, IColumnsCompiler, ICompilerOutput, ILimitBuilder, ILimitCompiler, InsertQueryBuilder, IOrderByBuilder, IWhereBuilder, IWhereCompiler, OrderByBuilder, QueryBuilder, SelectQueryBuilder, UpdateQueryBuilder, SelectQueryCompiler, TableQueryCompiler, TableQueryBuilder, ColumnQueryBuilder, ColumnQueryCompiler, RawQuery, IQueryBuilder, OrderByQueryCompiler } from "@spinajs/orm";
+import { ColumnStatement, OnDuplicateQueryBuilder, IJoinCompiler, DeleteQueryBuilder, IColumnsBuilder, IColumnsCompiler, ICompilerOutput, ILimitBuilder, ILimitCompiler, InsertQueryBuilder, IOrderByBuilder, IWhereBuilder, IWhereCompiler, OrderByBuilder, QueryBuilder, SelectQueryBuilder, UpdateQueryBuilder, SelectQueryCompiler, TableQueryCompiler, TableQueryBuilder, ColumnQueryBuilder, ColumnQueryCompiler, RawQuery, IQueryBuilder, OrderByQueryCompiler, OnDuplicateQueryCompiler, IJoinBuilder } from "@spinajs/orm";
 import { use } from "typescript-mix";
 import { NewInstance, Inject, Container, Autoinject } from "@spinajs/di";
 import _ = require("lodash");
@@ -143,14 +143,27 @@ export class SqlWhereCompiler implements IWhereCompiler {
     }
 }
 
+@NewInstance()
+export class SqlJoinCompiler implements IJoinCompiler {
+    public join(builder: IJoinBuilder) {
+
+        const result = builder.JoinStatements.map(s => s.build());
+
+        return {
+            bindings: result.flatMap(r => r.Bindings),
+            expression: result.flatMap(r => r.Statements).join(" ")
+        };
+    }
+}
+
 
 // tslint:disable-next-line
-export interface SqlSelectQueryCompiler extends IWhereCompiler, ILimitCompiler, IColumnsCompiler, ITableAliasCompiler { }
+export interface SqlSelectQueryCompiler extends IWhereCompiler, ILimitCompiler, IColumnsCompiler, ITableAliasCompiler, IJoinCompiler { }
 
 @NewInstance()
 export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder> {
 
-    @use(SqlWhereCompiler, SqlLimitCompiler, SqlColumnsCompiler, TableAliasCompiler)
+    @use(SqlWhereCompiler, SqlLimitCompiler, SqlColumnsCompiler, TableAliasCompiler, SqlJoinCompiler)
     /// @ts-ignore
     private this: this;
 
@@ -168,10 +181,12 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
         const limit = this.limit(this._builder as ILimitBuilder);
         const sort = this.sort(this._builder as IOrderByBuilder);
         const where = this.where(this._builder as IWhereBuilder);
+        const join = this.join(this._builder as IJoinBuilder);
 
-        const expression = columns + " " + from + ((where.expression) ? ` WHERE ${where.expression}` : "") + limit.expression + sort.expression;
+        const expression = columns + " " + from + ((join.expression) ? ` ${join.expression}` : "") + ((where.expression) ? ` WHERE ${where.expression}` : "") + limit.expression + sort.expression;
 
         const bindings = [];
+        bindings.push(...join.bindings);
         bindings.push(...where.bindings);
         bindings.push(...limit.bindings);
         bindings.push(...sort.bindings);
@@ -324,20 +339,48 @@ export class SqlDeleteQueryCompiler extends SqlQueryCompiler<DeleteQueryBuilder>
         return `DELETE FROM ${this.tableAliasCompiler(this._builder)}`;
     }
 }
+@NewInstance()
+export class SqlOnDuplicateQueryCompiler implements OnDuplicateQueryCompiler {
+    protected _builder: OnDuplicateQueryBuilder;
 
-export class SqlOnDuplicateQueryCompiler extends SqlQueryCompiler<OnDuplicateQueryBuilder>
-{
-    public compile(){
+    constructor(builder: OnDuplicateQueryBuilder) {
+        this._builder = builder;
+    }
 
-        const columns = this._builder.
+    public compile() {
+
+        const columns = this._builder.getColumnsToUpdate().map((c: string | RawQuery): string => {
+            if (_.isString(c)) {
+                return `\`${c}\` = \`?\``;
+            } else {
+                return c.Query;
+            }
+        }).join(",");
+
+        const bindings = this._builder.getColumnsToUpdate().flatMap((c: string | RawQuery): any => {
+            if (_.isString(c)) {
+                return this._builder.getParent().Values[0];
+            } else {
+                return c.Bindings;
+            }
+        });
+
         return {
-            expression: "ON DUPLICATE KEY UPDATE "
+            bindings,
+            expression: `ON DUPLICATE KEY UPDATE ${columns}`
         }
     }
 }
 
 @NewInstance()
 export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder> {
+
+    @Autoinject()
+    protected _container: Container;
+
+    constructor(builder: InsertQueryBuilder) {
+        super(builder)
+    }
 
     public compile() {
 
@@ -347,13 +390,21 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
         const onDuplicate = this.onDuplicate();
 
         return {
-            bindings: values.bindings,
-            expression: into + " " + columns + " " + values.data
+            bindings: values.bindings.concat(onDuplicate.bindings),
+            expression: `${into} ${columns} ${values.data} ${onDuplicate.expression}`.trim()
         }
     }
 
-    protected onDuplicate(){
-        const compiler = this.container.resolve(OnDuplicateQueryCompiler, [this.]).compile()
+    protected onDuplicate() {
+
+        if (this._builder.DuplicateQueryBuilder) {
+            return this._container.resolve(OnDuplicateQueryCompiler, [this._builder.DuplicateQueryBuilder]).compile();
+        }
+
+        return {
+            bindings: [],
+            expression: ""
+        };
     }
 
     protected values() {

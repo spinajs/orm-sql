@@ -1,6 +1,6 @@
 import { SqlWhereCompiler } from './compilers';
 import { NewInstance } from "@spinajs/di";
-import { BetweenStatement, ColumnStatement, ColumnRawStatement, InStatement, IQueryStatementResult, RawQueryStatement, WhereStatement, ExistsQueryStatement, ColumnMethodStatement, WhereQueryStatement } from "@spinajs/orm";
+import { BetweenStatement, JoinStatement, ColumnStatement, ColumnRawStatement, InStatement, IQueryStatementResult, RawQueryStatement, WhereStatement, ExistsQueryStatement, ColumnMethodStatement, WhereQueryStatement } from "@spinajs/orm";
 import { WhereOperators } from '@spinajs/orm/lib/enums';
 
 @NewInstance()
@@ -33,6 +33,24 @@ export class SqlWhereStatement extends WhereStatement {
         return {
             Bindings: [this._value],
             Statements: [`\`${this._column}\` ${this._operator.toUpperCase()}${binding}`]
+        }
+    }
+}
+
+@NewInstance()
+export class SqlJoinStatement extends JoinStatement {
+    public build(): IQueryStatementResult {
+
+        if(this._query){
+            return {
+                Bindings: this._query.Bindings,
+                Statements: [`${this._method} ${this._query.Query}`]
+            }
+        }
+
+        return {
+            Bindings: [],
+            Statements: [`${this._method} \`${this._table}\` ON ${this._primaryKey} = ${this._foreignKey}`]
         }
     }
 }
