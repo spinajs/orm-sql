@@ -169,23 +169,7 @@ describe("Where query builder", () => {
         const result = sqb().select("*").from("users").leftJoin(new RawQuery("client ON foo=bar")).toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` LEFT JOIN client ON foo=bar");
     })
-});
-
-describe("Where query builder", () => {
-
-    beforeEach(async () => {
-        DI.register(ConnectionConf).as(Configuration);
-        DI.register(SpinaJsDefaultLog).as(LogModule);
-        DI.register(FakeSqliteDriver).as("sqlite");
-
-        DI.resolve(LogModule);
-        await DI.resolve(Orm);
-    });
-
-    afterEach(async () => {
-        DI.clear();
-    });
-
+ 
     it("clear where", () => {
         const result = sqb().select("*").from("users").where('id', "=", 1).clearWhere().toDB();
         expect(result.expression).to.equal("SELECT * FROM `users`");
