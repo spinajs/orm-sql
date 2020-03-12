@@ -1,5 +1,5 @@
 import { InvalidOperationException } from "@spinajs/exceptions";
-import { ColumnStatement, OnDuplicateQueryBuilder, IJoinCompiler, DeleteQueryBuilder, IColumnsBuilder, IColumnsCompiler, ICompilerOutput, ILimitBuilder, ILimitCompiler, InsertQueryBuilder, IOrderByBuilder, IWhereBuilder, IWhereCompiler, OrderByBuilder, QueryBuilder, SelectQueryBuilder, UpdateQueryBuilder, SelectQueryCompiler, TableQueryCompiler, TableQueryBuilder, ColumnQueryBuilder, ColumnQueryCompiler, RawQuery, IQueryBuilder, OrderByQueryCompiler, OnDuplicateQueryCompiler, IJoinBuilder } from "@spinajs/orm";
+import { ColumnStatement, OnDuplicateQueryBuilder, IJoinCompiler, DeleteQueryBuilder, IColumnsBuilder, IColumnsCompiler, ICompilerOutput, ILimitBuilder, ILimitCompiler, InsertQueryBuilder, IOrderByBuilder, IWhereBuilder, IWhereCompiler, OrderByBuilder, QueryBuilder, SelectQueryBuilder, UpdateQueryBuilder, SelectQueryCompiler, TableQueryCompiler, TableQueryBuilder, ColumnQueryBuilder, ColumnQueryCompiler, RawQuery, IQueryBuilder, OrderByQueryCompiler, OnDuplicateQueryCompiler, IJoinBuilder, IndexQueryCompiler, IndexQueryBuilder } from "@spinajs/orm";
 import { use } from "typescript-mix";
 import { NewInstance, Inject, Container, Autoinject } from "@spinajs/di";
 import _ = require("lodash");
@@ -368,6 +368,23 @@ export class SqlOnDuplicateQueryCompiler implements OnDuplicateQueryCompiler {
         return {
             bindings,
             expression: `ON DUPLICATE KEY UPDATE ${columns}`
+        }
+    }
+}
+
+@NewInstance()
+export class SqlIndexQueryCompiler implements IndexQueryCompiler {
+    protected _builder: IndexQueryBuilder;
+
+    constructor(builder: IndexQueryBuilder) {
+        this._builder = builder;
+    }
+
+    public compile(): ICompilerOutput {
+
+        return {
+            bindings: [],
+            expression: `CREATE ${this._builder.Unique ? "UNIQUE " : ""}INDEX ${this._builder.Name} ON ${this._builder.Table} (${this._builder.Columns.join(",")});`
         }
     }
 }

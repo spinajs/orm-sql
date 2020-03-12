@@ -1,7 +1,7 @@
-import { OrmDriver, InStatement, RawQueryStatement, BetweenStatement, WhereStatement, ColumnStatement, ColumnMethodStatement, ExistsQueryStatement, ColumnRawStatement, WhereQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, DeleteQueryCompiler, InsertQueryCompiler, TableQueryCompiler, OrderByQueryCompiler, OnDuplicateQueryCompiler, JoinStatement } from "@spinajs/orm";
+import { OrmDriver, InStatement, RawQueryStatement, BetweenStatement, WhereStatement, ColumnStatement, ColumnMethodStatement, ExistsQueryStatement, ColumnRawStatement, WhereQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, DeleteQueryCompiler, InsertQueryCompiler, TableQueryCompiler, OrderByQueryCompiler, OnDuplicateQueryCompiler, JoinStatement, IndexQueryCompiler } from "@spinajs/orm";
 import { IContainer } from "@spinajs/di";
 import { SqlInStatement, SqlRawStatement, SqlBetweenStatement, SqlWhereStatement, SqlColumnStatement, SqlColumnMethodStatement, SqlExistsQueryStatement, SqlColumnRawStatement, SqlWhereQueryStatement, SqlJoinStatement } from "./statements";
-import { SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlTableQueryCompiler, SqlOrderQueryByCompiler, SqlOnDuplicateQueryCompiler } from "./compilers";
+import { SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlTableQueryCompiler, SqlOrderQueryByCompiler, SqlOnDuplicateQueryCompiler, SqlIndexQueryCompiler } from "./compilers";
 
 export * from "./compilers";
 export * from "./statements";
@@ -32,6 +32,7 @@ export abstract class SqlDriver extends OrmDriver {
         this.Container.register(SqlTableQueryCompiler).as(TableQueryCompiler);
         this.Container.register(SqlOrderQueryByCompiler).as(OrderByQueryCompiler);
         this.Container.register(SqlOnDuplicateQueryCompiler).as(OnDuplicateQueryCompiler);
+        this.Container.register(SqlIndexQueryCompiler).as(IndexQueryCompiler);
 
     }
 }

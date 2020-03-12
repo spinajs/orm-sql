@@ -1,3 +1,4 @@
+import { IndexQueryBuilder } from '@spinajs/orm';
 import { expect } from 'chai';
 import 'mocha';
 import { SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, Orm, IWhereBuilder } from '@spinajs/orm';
@@ -32,6 +33,11 @@ function iqb() {
 function schqb() {
     const connection = db().Connections.get("sqlite");
     return connection.Container.resolve(SchemaQueryBuilder, [connection]);
+}
+
+function inqb() {
+    const connection = db().Connections.get("sqlite");
+    return connection.Container.resolve(IndexQueryBuilder, [connection]);
 }
 
 function db() {
@@ -605,6 +611,12 @@ describe("schema building", () => {
         }).toDB();
 
         expect(result.expression).to.contain("`foo` TIMESTAMP DEFAULT CURRENT_TIMESTAMP");
+    })
+
+    it("create index", () => {
+        const result = inqb().table("metadata").unique().name("metadata_owners_idx").columns(["OwnerId","Key"]).toDB();
+
+        expect(result.expression).to.contain("CREATE UNIQUE INDEX metadata_owners_idx ON metadata(OwnerId,Key)");
     })
 
 
