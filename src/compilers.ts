@@ -373,10 +373,12 @@ export class SqlOnDuplicateQueryCompiler implements OnDuplicateQueryCompiler {
 }
 
 @NewInstance()
-export class SqlIndexQueryCompiler implements IndexQueryCompiler {
+export class SqlIndexQueryCompiler extends IndexQueryCompiler {
     protected _builder: IndexQueryBuilder;
 
     constructor(builder: IndexQueryBuilder) {
+        super();
+        
         this._builder = builder;
     }
 

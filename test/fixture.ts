@@ -1,6 +1,6 @@
 import { SqlJoinStatement } from './../src/statements';
-import { SqlOnDuplicateQueryCompiler } from './../src/compilers';
-import { OrmDriver, IColumnDescriptor, InStatement, RawQueryStatement, BetweenStatement, WhereStatement, ColumnStatement, ColumnMethodStatement, ExistsQueryStatement, ColumnRawStatement, WhereQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, DeleteQueryCompiler, InsertQueryCompiler, TableQueryCompiler, ColumnQueryCompiler, OrderByQueryCompiler, OnDuplicateQueryCompiler, JoinStatement } from "@spinajs/orm";
+import { SqlOnDuplicateQueryCompiler, SqlIndexQueryCompiler } from './../src/compilers';
+import { OrmDriver, IColumnDescriptor, InStatement, RawQueryStatement, BetweenStatement, WhereStatement, ColumnStatement, ColumnMethodStatement, ExistsQueryStatement, ColumnRawStatement, WhereQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, DeleteQueryCompiler, InsertQueryCompiler, TableQueryCompiler, ColumnQueryCompiler, OrderByQueryCompiler, OnDuplicateQueryCompiler, JoinStatement, IndexQueryCompiler } from "@spinajs/orm";
 import { IContainer } from "@spinajs/di";
 import { SqlInStatement, SqlRawStatement, SqlBetweenStatement, SqlWhereStatement, SqlColumnStatement, SqlColumnMethodStatement, SqlExistsQueryStatement, SqlColumnRawStatement, SqlWhereQueryStatement } from "../src/statements";
 import { SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlTableQueryCompiler, SqlColumnQueryCompiler, SqlOrderQueryByCompiler } from "../src/compilers";
@@ -57,6 +57,8 @@ export class FakeSqliteDriver extends OrmDriver {
         this.Container.register(SqlColumnQueryCompiler).as(ColumnQueryCompiler);
         this.Container.register(SqlOrderQueryByCompiler).as(OrderByQueryCompiler);
         this.Container.register(SqlOnDuplicateQueryCompiler).as(OnDuplicateQueryCompiler);
+        this.Container.register(SqlIndexQueryCompiler).as(IndexQueryCompiler);
+
 
 
 
