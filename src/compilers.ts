@@ -150,8 +150,8 @@ export class SqlJoinCompiler implements IJoinCompiler {
         const result = builder.JoinStatements.map(s => s.build());
 
         return {
-            bindings: result.flatMap(r => r.Bindings),
-            expression: result.flatMap(r => r.Statements).join(" ")
+            bindings: _.flatMap(result, r => r.Bindings),
+            expression: _.flatMap(result, r => r.Statements).join(" ")
         };
     }
 }
@@ -357,7 +357,7 @@ export class SqlOnDuplicateQueryCompiler implements OnDuplicateQueryCompiler {
             }
         }).join(",");
 
-        const bindings = this._builder.getColumnsToUpdate().flatMap((c: string | RawQuery): any => {
+        const bindings = _.flatMap(this._builder.getColumnsToUpdate(), (c: string | RawQuery): any => {
             if (_.isString(c)) {
                 return this._builder.getParent().Values[0];
             } else {
