@@ -616,7 +616,7 @@ describe("schema building", () => {
     it("create index", () => {
         const result = inqb().table("metadata").unique().name("metadata_owners_idx").columns(["OwnerId","Key"]).toDB();
 
-        expect(result.expression).to.contain("CREATE UNIQUE INDEX metadata_owners_idx ON metadata (OwnerId,Key)");
+        expect(result.expression).to.contain("CREATE UNIQUE INDEX `metadata_owners_idx` ON metadata (`OwnerId`,`Key`)");
     })
 
 
