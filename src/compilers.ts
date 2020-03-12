@@ -378,7 +378,7 @@ export class SqlIndexQueryCompiler extends IndexQueryCompiler {
 
     constructor(builder: IndexQueryBuilder) {
         super();
-        
+
         this._builder = builder;
     }
 
@@ -386,7 +386,7 @@ export class SqlIndexQueryCompiler extends IndexQueryCompiler {
 
         return {
             bindings: [],
-            expression: `CREATE ${this._builder.Unique ? "UNIQUE " : ""}INDEX ${this._builder.Name} ON ${this._builder.Table} (${this._builder.Columns.join(",")});`
+            expression: `CREATE ${this._builder.Unique ? "UNIQUE " : ""}INDEX \`${this._builder.Name}\` ON ${this._builder.Table} (${this._builder.Columns.map(c => `\`${c}\``).join(",")});`
         }
     }
 }
