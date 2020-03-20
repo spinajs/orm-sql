@@ -1,4 +1,4 @@
-import { InvalidOperationException } from "@spinajs/exceptions";
+import { InvalidOperation } from "@spinajs/exceptions";
 import { ColumnStatement, OnDuplicateQueryBuilder, IJoinCompiler, DeleteQueryBuilder, IColumnsBuilder, IColumnsCompiler, ICompilerOutput, ILimitBuilder, ILimitCompiler, InsertQueryBuilder, IOrderByBuilder, IWhereBuilder, IWhereCompiler, OrderByBuilder, QueryBuilder, SelectQueryBuilder, UpdateQueryBuilder, SelectQueryCompiler, TableQueryCompiler, TableQueryBuilder, ColumnQueryBuilder, ColumnQueryCompiler, RawQuery, IQueryBuilder, OrderByQueryCompiler, OnDuplicateQueryCompiler, IJoinBuilder, IndexQueryCompiler, IndexQueryBuilder } from "@spinajs/orm";
 import { use } from "typescript-mix";
 import { NewInstance, Inject, Container, Autoinject } from "@spinajs/di";
@@ -36,7 +36,7 @@ export abstract class SqlQueryCompiler<T extends QueryBuilder> extends SelectQue
         super();
 
         if (!builder) {
-            throw new InvalidOperationException('builder cannot be null or undefined');
+            throw new InvalidOperation('builder cannot be null or undefined');
         }
 
         this._builder = builder;
@@ -53,7 +53,7 @@ export class SqlOrderQueryByCompiler extends OrderByQueryCompiler {
         super();
 
         if (!builder) {
-            throw new InvalidOperationException('builder cannot be null or undefined');
+            throw new InvalidOperation('builder cannot be null or undefined');
         }
 
         this._builder = builder;
