@@ -4,14 +4,12 @@ import 'mocha';
 import { SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, Orm, IWhereBuilder } from '@spinajs/orm';
 import { DI } from '@spinajs/di';
 import { Configuration } from "@spinajs/configuration";
-import { join, normalize, resolve } from 'path';
 import { SpinaJsDefaultLog, LogModule } from "@spinajs/log";
 import { ConnectionConf, FakeSqliteDriver } from './fixture';
+import { RelationModel } from './Models/RelationModel';
+import sinon from 'sinon';
 
 
-export function dir(path: string) {
-    return resolve(normalize(join(__dirname, path)));
-}
 
 
 function sqb() {
@@ -87,7 +85,7 @@ describe("Query builder generic", () => {
         const query = sqb().select("*").from("users", "u");
 
         expect(query.TableAlias).to.equal("u");
-        expect(query.toDB().expression).to.equal("SELECT * FROM `users` as u");
+        expect(query.toDB().expression).to.equal("SELECT u.* FROM `users` as u");
     })
 
     it("ensure table presents", () => {
@@ -117,7 +115,7 @@ describe("Query builder generic", () => {
 
 describe("Where query builder", () => {
 
-    
+
     beforeEach(async () => {
         DI.register(ConnectionConf).as(Configuration);
         DI.register(SpinaJsDefaultLog).as(LogModule);
@@ -132,42 +130,42 @@ describe("Where query builder", () => {
     });
 
     it("left join", () => {
-        const result = sqb().select("*").from("users").leftJoin("adresses","addressId", "id").toDB();
+        const result = sqb().select("*").from("users").leftJoin("adresses", "addressId", "id").toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` LEFT JOIN `adresses` ON id = addressId");
     })
 
     it("right join", () => {
-        const result = sqb().select("*").from("users").rightJoin("adresses","addressId", "id").toDB();
+        const result = sqb().select("*").from("users").rightJoin("adresses", "addressId", "id").toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` RIGHT JOIN `adresses` ON id = addressId");
     })
 
     it("left outer join", () => {
-        const result = sqb().select("*").from("users").leftOuterJoin("adresses","addressId", "id").toDB();
+        const result = sqb().select("*").from("users").leftOuterJoin("adresses", "addressId", "id").toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` LEFT OUTER JOIN `adresses` ON id = addressId");
     })
 
     it("inner join", () => {
-        const result = sqb().select("*").from("users").innerJoin("adresses","addressId", "id").toDB();
+        const result = sqb().select("*").from("users").innerJoin("adresses", "addressId", "id").toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` INNER JOIN `adresses` ON id = addressId");
     })
 
     it("right outer join", () => {
-        const result = sqb().select("*").from("users").rightOuterJoin("adresses","addressId", "id").toDB();
+        const result = sqb().select("*").from("users").rightOuterJoin("adresses", "addressId", "id").toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` RIGHT OUTER JOIN `adresses` ON id = addressId");
     })
 
     it("full outer join", () => {
-        const result = sqb().select("*").from("users").fullOuterJoin("adresses","addressId", "id").toDB();
+        const result = sqb().select("*").from("users").fullOuterJoin("adresses", "addressId", "id").toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` FULL OUTER JOIN `adresses` ON id = addressId");
     })
- 
+
     it("cross join", () => {
-        const result = sqb().select("*").from("users").crossJoin("adresses","addressId", "id").toDB();
+        const result = sqb().select("*").from("users").crossJoin("adresses", "addressId", "id").toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` CROSS JOIN `adresses` ON id = addressId");
     })
 
     it("multiple joins", () => {
-        const result = sqb().select("*").from("users").leftJoin("adresses","addressId", "id").leftJoin("account", "accountId","id").toDB();
+        const result = sqb().select("*").from("users").leftJoin("adresses", "addressId", "id").leftJoin("account", "accountId", "id").toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` LEFT JOIN `adresses` ON id = addressId LEFT JOIN `account` ON id = accountId");
     })
 
@@ -175,7 +173,7 @@ describe("Where query builder", () => {
         const result = sqb().select("*").from("users").leftJoin(new RawQuery("client ON foo=bar")).toDB();
         expect(result.expression).to.equal("SELECT * FROM `users` LEFT JOIN client ON foo=bar");
     })
- 
+
     it("clear where", () => {
         const result = sqb().select("*").from("users").where('id', "=", 1).clearWhere().toDB();
         expect(result.expression).to.equal("SELECT * FROM `users`");
@@ -183,54 +181,54 @@ describe("Where query builder", () => {
 
     it("where exists", () => {
         const result = sqb().select("*").from("users").whereExist(sqb().where("id", 1).from("comments")).toDB();
-        expect(result.expression).to.equal("SELECT * FROM `users` WHERE EXISTS ( SELECT * FROM `comments` WHERE `id` = ? )");
+        expect(result.expression).to.equal("SELECT * FROM `users` WHERE EXISTS ( SELECT * FROM `comments` WHERE id = ? )");
     });
 
     it("where not exists", () => {
         const result = sqb().select("*").from("users").whereNotExists(sqb().where("id", 1).from("comments")).toDB();
-        expect(result.expression).to.equal("SELECT * FROM `users` WHERE NOT EXISTS ( SELECT * FROM `comments` WHERE `id` = ? )");
+        expect(result.expression).to.equal("SELECT * FROM `users` WHERE NOT EXISTS ( SELECT * FROM `comments` WHERE id = ? )");
     });
 
     it("where in", () => {
         const result = sqb().select("*").from("users").whereIn('id', [1, 2, 3]).toDB();
-        expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` IN (?,?,?)");
+        expect(result.expression).to.equal("SELECT * FROM `users` WHERE id IN (?,?,?)");
         expect(result.bindings).to.be.an("array").to.include.members([1, 2, 3]);
 
     })
 
     it("where not in", () => {
         const result = sqb().select("*").from("users").whereNotIn('id', [1, 2, 3]).toDB();
-        expect(result.expression).to.eq("SELECT * FROM `users` WHERE `id` NOT IN (?,?,?)");
+        expect(result.expression).to.eq("SELECT * FROM `users` WHERE id NOT IN (?,?,?)");
         expect(result.bindings).to.be.an("array").to.include.members([1, 2, 3]);
     })
 
     it("where between", () => {
         const result = sqb().select("*").from("users").whereBetween('id', [1, 2]).toDB();
-        expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` BETWEEN ? AND ?");
+        expect(result.expression).to.equal("SELECT * FROM `users` WHERE id BETWEEN ? AND ?");
         expect(result.bindings).to.be.an("array").to.include.members([1, 2]);
     })
 
     it("where not between", () => {
         const result = sqb().select("*").from("users").whereNotBetween('id', [1, 2]).toDB();
-        expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` NOT BETWEEN ? AND ?");
+        expect(result.expression).to.equal("SELECT * FROM `users` WHERE id NOT BETWEEN ? AND ?");
         expect(result.bindings).to.be.an("array").to.include.members([1, 2]);
     })
 
     it("where simple and", () => {
         const result = sqb().select("*").from("users").where("id", 1).where("email", "spine@spine.pl").toDB();
-        expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` = ? AND `email` = ?");
+        expect(result.expression).to.equal("SELECT * FROM `users` WHERE id = ? AND email = ?");
         expect(result.bindings).to.be.an("array").to.include("spine@spine.pl");
     })
 
     it("where simple or", () => {
         const result = sqb().select("*").from("users").where("id", 1).orWhere("email", "spine@spine.pl").toDB();
-        expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` = ? OR `email` = ?");
+        expect(result.expression).to.equal("SELECT * FROM `users` WHERE id = ? OR email = ?");
         expect(result.bindings).to.be.an("array").to.include.members([1, "spine@spine.pl"]);
     })
 
     it("where nested expressions", () => {
         const result = sqb().select("*").from("users").where("id", 1).orWhere("email", "spine@spine.pl").toDB();
-        expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` = ? OR `email` = ?");
+        expect(result.expression).to.equal("SELECT * FROM `users` WHERE id = ? OR email = ?");
     })
 
     it("where true && where false", () => {
@@ -249,7 +247,7 @@ describe("Where query builder", () => {
             this.where("c", 1).where("d", 2);
         }).orWhere("f", 3).toDB();
 
-        expect(result.expression).to.equal("SELECT * FROM `users` WHERE ( `a` = ? AND `b` = ? ) OR ( `c` = ? AND `d` = ? ) OR `f` = ?");
+        expect(result.expression).to.equal("SELECT * FROM `users` WHERE ( a = ? AND b = ? ) OR ( c = ? AND d = ? ) OR f = ?");
     });
 
     it("where RAW expressions", () => {
@@ -260,7 +258,7 @@ describe("Where query builder", () => {
     it("where explicit operator", () => {
 
         const result = sqb().select("*").from("users").where("id", ">=", 1).toDB();
-        expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` >= ?");
+        expect(result.expression).to.equal("SELECT * FROM `users` WHERE id >= ?");
 
         expect(() => {
             sqb().select("*").from("users").where("id", ">==", 1).toDB();
@@ -273,7 +271,7 @@ describe("Where query builder", () => {
             active: true
         }).toDB();
 
-        expect(result.expression).to.equal("SELECT * FROM `users` WHERE `id` = ? AND `active` = ?");
+        expect(result.expression).to.equal("SELECT * FROM `users` WHERE id = ? AND active = ?");
         expect(result.bindings).to.be.an("array").to.include(1).and.include(true);
 
     });
@@ -303,12 +301,160 @@ describe("Delete query builder", () => {
 
     it("Simple delete", () => {
         const result = dqb().from("users").schema("spine").where("active", false).toDB();
-        expect(result.expression).to.equal("DELETE FROM `spine`.`users` WHERE `active` = ?");
+        expect(result.expression).to.equal("DELETE FROM `spine`.`users` WHERE active = ?");
     });
 
     it("Simple truncate", () => {
         const result = dqb().from("users").schema("spine").truncate().toDB();
         expect(result.expression).to.equal("TRUNCATE TABLE `spine`.`users`");
+    });
+});
+
+describe("Relations query builder", () => {
+
+    beforeEach(async () => {
+        DI.register(ConnectionConf).as(Configuration);
+        DI.register(SpinaJsDefaultLog).as(LogModule);
+        DI.register(FakeSqliteDriver).as("sqlite");
+
+        const tableInfoStub = sinon.stub(FakeSqliteDriver.prototype, "tableInfo");
+        tableInfoStub.withArgs("RelationTable", undefined).returns(new Promise(res => {
+            res([{
+                Type: "INT",
+                MaxLength: 0,
+                Comment: "",
+                DefaultValue: null,
+                NativeType: "INT",
+                Unsigned: false,
+                Nullable: true,
+                PrimaryKey: true,
+                AutoIncrement: true,
+                Name: "Id",
+                Converter: null,
+                Schema: "sqlite",
+                Unique: false
+            },
+            {
+                Type: "INT",
+                MaxLength: 0,
+                Comment: "",
+                DefaultValue: null,
+                NativeType: "INT",
+                Unsigned: false,
+                Nullable: true,
+                PrimaryKey: true,
+                AutoIncrement: true,
+                Name: "relation_id",
+                Converter: null,
+                Schema: "sqlite",
+                Unique: false
+            },
+            {
+                Type: "INT",
+                MaxLength: 0,
+                Comment: "",
+                DefaultValue: null,
+                NativeType: "INT",
+                Unsigned: false,
+                Nullable: true,
+                PrimaryKey: true,
+                AutoIncrement: true,
+                Name: "relation2_id",
+                Converter: null,
+                Schema: "sqlite",
+                Unique: false
+            }]);
+        })).withArgs("RelationTable2", undefined).returns(new Promise(res => {
+            res([{
+                Type: "INT",
+                MaxLength: 0,
+                Comment: "",
+                DefaultValue: null,
+                NativeType: "INT",
+                Unsigned: false,
+                Nullable: true,
+                PrimaryKey: true,
+                AutoIncrement: true,
+                Name: "Id",
+                Converter: null,
+                Schema: "sqlite",
+                Unique: false
+            }, {
+                Type: "VARCHAR",
+                MaxLength: 0,
+                Comment: "",
+                DefaultValue: null,
+                NativeType: "VARCHAR",
+                Unsigned: false,
+                Nullable: true,
+                PrimaryKey: true,
+                AutoIncrement: true,
+                Name: "RelationProperty",
+                Converter: null,
+                Schema: "sqlite",
+                Unique: false
+            }]);
+        })).withArgs("RelationTable3", undefined).returns(new Promise(res => {
+            res([{
+                Type: "INT",
+                MaxLength: 0,
+                Comment: "",
+                DefaultValue: null,
+                NativeType: "INT",
+                Unsigned: false,
+                Nullable: true,
+                PrimaryKey: true,
+                AutoIncrement: true,
+                Name: "Id",
+                Converter: null,
+                Schema: "sqlite",
+                Unique: false
+            }, {
+                Type: "VARCHAR",
+                MaxLength: 0,
+                Comment: "",
+                DefaultValue: null,
+                NativeType: "VARCHAR",
+                Unsigned: false,
+                Nullable: true,
+                PrimaryKey: true,
+                AutoIncrement: true,
+                Name: "RelationProperty3",
+                Converter: null,
+                Schema: "sqlite",
+                Unique: false
+            }]);
+        }));
+
+        DI.resolve(LogModule);
+        await DI.resolve(Orm);
+    });
+
+    afterEach(async () => {
+        DI.clear();
+        sinon.restore();
+    });
+
+    it("belongsTo simple", () => {
+        const result = RelationModel.where("Id", 1).populate("Relation").toDB();
+
+        expect(result.expression).to.equal("SELECT $RelationModel$.*,$Relation$.`Id` as `$Relation$.Id`,$Relation$.`RelationProperty` as `$Relation$.RelationProperty` FROM `RelationTable` as $RelationModel$ LEFT JOIN `RelationTable2` as `$Relation$` ON `$Relation$`.Id = `$RelationModel$`.relation_id WHERE $RelationModel$.Id = ?");
+    });
+
+    it("belongsTo nested", () => {
+        const result = RelationModel.where("Id", 1).populate("Relation", function () {
+            this.populate("Relation3");
+        }).toDB();
+
+        expect(result.expression).to.equal("SELECT $RelationModel$.*,$RelationModel2$.`Id` as `$Relation$.Id`,$RelationModel2$.`RelationProperty` as `$Relation$.RelationProperty`,$Relation.$Relation3$.`Id` as `$Relation.$Relation3$.Id`,$Relation.$Relation3$.`RelationProperty3` as `$Relation.$Relation3$.RelationProperty3` FROM `RelationTable` as $RelationModel$ LEFT JOIN `RelationTable2` as `$Relation$` ON `$Relation$`.Id = `$RelationModel$`.relation_id LEFT JOIN `RelationTable3` as `$Relation.$Relation3$` ON `$Relation.$Relation3$`.Id = `$RelationModel2$`.relation3_id WHERE $RelationModel$.Id = ?");
+    });
+
+    it("belongsTo with custom keys", () => {
+        const result = RelationModel.where("Id", 1).populate("Relation2").toDB();
+
+
+        expect(result.expression).to.equal("SELECT $RelationModel$.*,$Relation2$.`Id` as `$Relation2$.Id`,$Relation2$.`RelationProperty` as `$Relation2$.RelationProperty` FROM `RelationTable` as $RelationModel$ LEFT JOIN `RelationTable2` as `$Relation2$` ON `$Relation2$`.fK_Id = `$RelationModel$`.pK_Id WHERE $RelationModel$.Id = ?");
+
     });
 });
 
@@ -614,7 +760,7 @@ describe("schema building", () => {
     })
 
     it("create index", () => {
-        const result = inqb().table("metadata").unique().name("metadata_owners_idx").columns(["OwnerId","Key"]).toDB();
+        const result = inqb().table("metadata").unique().name("metadata_owners_idx").columns(["OwnerId", "Key"]).toDB();
 
         expect(result.expression).to.contain("CREATE UNIQUE INDEX `metadata_owners_idx` ON metadata (`OwnerId`,`Key`)");
     })

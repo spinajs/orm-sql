@@ -5,8 +5,12 @@ import { IContainer } from "@spinajs/di";
 import { SqlInStatement, SqlRawStatement, SqlBetweenStatement, SqlWhereStatement, SqlColumnStatement, SqlColumnMethodStatement, SqlExistsQueryStatement, SqlColumnRawStatement, SqlWhereQueryStatement } from "../src/statements";
 import { SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlTableQueryCompiler, SqlColumnQueryCompiler, SqlOrderQueryByCompiler } from "../src/compilers";
 import { Configuration } from "@spinajs/configuration";
-import { dir } from "./queryBuilder.test";
 import _ from "lodash";
+import { join, normalize, resolve } from 'path';
+
+export function dir(path: string) {
+    return resolve(normalize(join(__dirname, path)));
+}
 
 // @ts-ignore
 export class FakeSqliteDriver extends OrmDriver {
@@ -86,5 +90,10 @@ export class ConnectionConf extends Configuration {
 
     public get(path: string[], defaultValue?: any): any {
         return _.get(this.conf, path, defaultValue);
+    }
+
+    // tslint:disable-next-line: no-empty
+    public resolve(){
+        
     }
 }

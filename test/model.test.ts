@@ -32,8 +32,8 @@ describe("model generated queries", () => {
             Id: null
         });
 
-        expect(query.toDB().expression).to.eq("UPDATE `TestTable1` SET `Bar` = ? WHERE `Id` = ?")
-        expect(query2.toDB().expression).to.eq("UPDATE `TestTable1` SET `Bar` = ? WHERE `Id` IS NULL")
+        expect(query.toDB().expression).to.eq("UPDATE `TestTable1` SET `Bar` = ? WHERE Id = ?")
+        expect(query2.toDB().expression).to.eq("UPDATE `TestTable1` SET `Bar` = ? WHERE Id IS NULL")
 
     });
 

@@ -128,6 +128,24 @@
     glob "^7.1.4"
     lodash "^4.17.14"
 
+"@spinajs/configuration@^1.0.5":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@spinajs/configuration/-/configuration-1.0.6.tgz#fd1499912f2ffedebdd3131f7c95c8f9e17918ef"
+  integrity sha512-Vs8bZBaw3ijRUjqXUxqUXl/mXdmqOd3MfT13W2OI4/P9tMaJKJLJDOG0+wfUP1/9A6iIalvehrvm6Mf39Dbaow==
+  dependencies:
+    "@spinajs/di" "^1.0.11"
+    glob "^7.1.4"
+    lodash "^4.17.14"
+
+"@spinajs/di@^1.0.11":
+  version "1.0.12"
+  resolved "https://registry.yarnpkg.com/@spinajs/di/-/di-1.0.12.tgz#bdd46c8515db2acaf550fb5ed3a76e374556b194"
+  integrity sha512-CEpj8qD0npauLyAS0h5Mz4g36fRVQGOnkR+QWtlpMLaHyVqe/Tyt0sVR/rfLqfUUDCSuryOYUtWg9G4TZZ+8xw==
+  dependencies:
+    "@spinajs/exceptions" "^1.0.0"
+    lodash "^4.17.14"
+    reflect-metadata "^0.1.13"
+
 "@spinajs/di@^1.0.2", "@spinajs/di@^1.0.3", "@spinajs/di@^1.0.7":
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/@spinajs/di/-/di-1.0.7.tgz#302ea48073b06006c118818a0c470c1ef5131cc9"
@@ -154,29 +172,28 @@
     chalk "^3.0.0"
     lodash "^4.17.14"
 
-"@spinajs/orm@^1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@spinajs/orm/-/orm-1.0.6.tgz#f0d3e537667198501028508a52f709501bd90dba"
-  integrity sha512-rsiiazXzJJyy0PnTqiiNBUVoPvfXc2h0xonTeqQ5dIUKIHUwP0YEw+qhgryJ0I++Hww17oAc+ouzpG0deIjmJQ==
+"@spinajs/orm@^1.0.31":
+  version "1.0.31"
+  resolved "https://registry.yarnpkg.com/@spinajs/orm/-/orm-1.0.31.tgz#e5efd8474de1867d986fe43b5a96d62d68ef7cdd"
+  integrity sha512-1m39VyUP5wKig/Y+Fiv0KBrkNRfyZW6X7Qfa8dB+lYwIV1IcJ42PZN/gXVGKRfikfx/AtJaIyB5H2EQ5aeqYSQ==
   dependencies:
-    "@spinajs/configuration" "^1.0.0"
+    "@spinajs/configuration" "^1.0.5"
     "@spinajs/di" "^1.0.3"
     "@spinajs/exceptions" "^1.0.0"
     "@spinajs/log" "^1.0.0"
-    "@spinajs/reflection" "^1.0.0"
+    "@spinajs/reflection" "^1.0.4"
     lodash "^4.17.14"
     typescript-mix "^3.1.3"
 
-"@spinajs/reflection@^1.0.0":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@spinajs/reflection/-/reflection-1.0.2.tgz#6bcf9ec8798a5ff547facd1bbc4404c3c6536354"
-  integrity sha512-LbOrgaQ86V1dtZS1vHaxNatcN3NiHgo4JL3/Uf4hj2qQGmDU8frpr7+HeK2NHasxVUo2zfUnnQ08GJcJ86q95w==
+"@spinajs/reflection@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@spinajs/reflection/-/reflection-1.0.4.tgz#dd308494161d654c551f451b95d875d805201862"
+  integrity sha512-vBtk3Di3+jTaD8PP+IMIqOcJmBJk1mBGCMU1eUnDfgoV57fNA+Tug4MYqHQT/l3e8xejGwrJ1ZfdW9tUw5z5kA==
   dependencies:
     "@spinajs/configuration" "^1.0.0"
     "@spinajs/di" "^1.0.3"
     "@spinajs/exceptions" "^1.0.0"
     "@types/mocha" "^5.2.7"
-    lodash "^4.17.14"
 
 "@types/chai-as-promised@^7.1.0":
   version "7.1.2"

@@ -32,7 +32,7 @@ export class SqlBetweenStatement extends BetweenStatement {
 
     return {
       Bindings: this._val,
-      Statements: [`\`${this._column}\` ${exprr} ? AND ?`],
+      Statements: [`${this._column} ${exprr} ? AND ?`],
     };
   }
 }
@@ -41,9 +41,16 @@ export class SqlBetweenStatement extends BetweenStatement {
 export class SqlWhereStatement extends WhereStatement {
   public build(): IQueryStatementResult {
     const binding = this._operator === WhereOperators.NOT_NULL || this._operator === WhereOperators.NULL ? '' : ' ?';
+
+    let column = this._column;
+    if(this._tableAlias)
+    {
+      column = `${this._tableAlias}.${this._column}`;
+    }
+
     return {
       Bindings: [this._value],
-      Statements: [`\`${this._column}\` ${this._operator.toUpperCase()}${binding}`],
+      Statements: [`${column} ${this._operator.toUpperCase()}${binding}`],
     };
   }
 }
@@ -58,9 +65,23 @@ export class SqlJoinStatement extends JoinStatement {
       };
     }
 
+    let table = `\`${this._table}\``;
+    let primaryKey = this._primaryKey;
+    let foreignKey = this._foreignKey;
+
+    if (this._alias) {
+      table = `\`${this._table}\` as \`${this._alias}\``;
+      foreignKey = `\`${this._tableAlias}\`.${this._foreignKey}`
+    }
+
+    if(this._tableAlias)
+    {
+      primaryKey = `\`${this._alias}\`.${this._primaryKey}`
+    }
+
     return {
       Bindings: [],
-      Statements: [`${this._method} \`${this._table}\` ON ${this._primaryKey} = ${this._foreignKey}`],
+      Statements: [`${this._method} ${table} ON ${primaryKey} = ${foreignKey}`],
     };
   }
 }
@@ -72,7 +93,7 @@ export class SqlInStatement extends InStatement {
 
     return {
       Bindings: this._val,
-      Statements: [`\`${this._column}\` ${exprr} (${this._val.map(_ => '?').join(',')})`],
+      Statements: [`${this._column} ${exprr} (${this._val.map(_ => '?').join(',')})`],
     };
   }
 }
@@ -90,6 +111,10 @@ export class SqlColumnStatement extends ColumnStatement {
       if (this._alias) {
         exprr += ` as \`${this._alias}\``;
       }
+    }
+
+    if (this._tableAlias) {
+      exprr = `${this._tableAlias}.${exprr}`;
     }
 
     return {
