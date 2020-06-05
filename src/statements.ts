@@ -32,21 +32,12 @@ export class SqlWithRecursiveStatement extends WithRecursiveStatement{
   public build() : IQueryStatementResult
   {
     const initialQuery = this._query.clone().clearJoins().toDB();
-    const additionalQuery = this._query.clone().clearWhere().clearJoins().setAlias("$recursive$").innerJoin("recursive_cte","$recursive_cte$", this._rcKeyName, this._pkName).toDB();
+    const additionalQuery = this._query.clone().clearWhere().clearJoins().setAlias("$recursive$").innerJoin("recursive_cte","$recursive_cte$", this._pkName, this._rcKeyName).toDB();
 
-    let exprr = "WITH RECURSIVE recursive_cte";
-    exprr += `(`;
-
-    exprr += initialQuery.expression;
-    exprr += `UNION ALL`;
-    exprr += additionalQuery.expression;
-
-    exprr += `)`;
-    exprr += "SELECT * FROM recursive_cte";
 
     return {
       Bindings: initialQuery.bindings.concat(additionalQuery.bindings),
-      Statements: [exprr],
+      Statements: [initialQuery.expression, additionalQuery.expression],
     };
   }
 }

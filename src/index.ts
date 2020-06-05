@@ -18,6 +18,8 @@ import {
   OnDuplicateQueryCompiler,
   JoinStatement,
   IndexQueryCompiler,
+  WithRecursiveStatement,
+  RecursiveQueryCompiler
 } from '@spinajs/orm';
 import { IContainer } from '@spinajs/di';
 import {
@@ -31,6 +33,7 @@ import {
   SqlColumnRawStatement,
   SqlWhereQueryStatement,
   SqlJoinStatement,
+  SqlWithRecursiveStatement,
 } from './statements';
 import {
   SqlSelectQueryCompiler,
@@ -41,6 +44,7 @@ import {
   SqlOrderQueryByCompiler,
   SqlOnDuplicateQueryCompiler,
   SqlIndexQueryCompiler,
+  SqlWithRecursiveCompiler,
 } from './compilers';
 
 export * from './compilers';
@@ -61,7 +65,10 @@ export abstract class SqlDriver extends OrmDriver {
     this.Container.register(SqlExistsQueryStatement).as(ExistsQueryStatement);
     this.Container.register(SqlColumnRawStatement).as(ColumnRawStatement);
     this.Container.register(SqlWhereQueryStatement).as(WhereQueryStatement);
+    this.Container.register(SqlWithRecursiveStatement).as(WithRecursiveStatement);
 
+
+    this.Container.register(SqlWithRecursiveCompiler).as(RecursiveQueryCompiler);
     this.Container.register(SqlSelectQueryCompiler).as(SelectQueryCompiler);
     this.Container.register(SqlUpdateQueryCompiler).as(UpdateQueryCompiler);
     this.Container.register(SqlDeleteQueryCompiler).as(DeleteQueryCompiler);

@@ -446,7 +446,7 @@ describe("Relations query builder", () => {
             this.populate("Relation3");
         }).toDB();
 
-        expect(result.expression).to.equal("SELECT $RelationModel$.*,$RelationModel2$.`Id` as `$Relation$.Id`,$RelationModel2$.`RelationProperty` as `$Relation$.RelationProperty`,$Relation.$Relation3$.`Id` as `$Relation.$Relation3$.Id`,$Relation.$Relation3$.`RelationProperty3` as `$Relation.$Relation3$.RelationProperty3` FROM `RelationTable` as $RelationModel$ LEFT JOIN `RelationTable2` as `$Relation$` ON `$Relation$`.Id = `$RelationModel$`.relation_id LEFT JOIN `RelationTable3` as `$Relation.$Relation3$` ON `$Relation.$Relation3$`.Id = `$RelationModel2$`.relation3_id WHERE $RelationModel$.Id = ?");
+        expect(result.expression).to.equal("SELECT $RelationModel$.*,$RelationModel2$.`Id` as `$Relation$.Id`,$RelationModel2$.`RelationProperty` as `$Relation$.RelationProperty`,$Relation$.$Relation3$.`Id` as `$Relation$.$Relation3$.Id`,$Relation$.$Relation3$.`RelationProperty3` as `$Relation$.$Relation3$.RelationProperty3` FROM `RelationTable` as $RelationModel$ LEFT JOIN `RelationTable2` as `$Relation$` ON `$Relation$`.Id = `$RelationModel$`.relation_id LEFT JOIN `RelationTable3` as `$Relation$.$Relation3$` ON `$Relation$.$Relation3$`.Id = `$RelationModel2$`.relation3_id WHERE $RelationModel$.Id = ?");
     });
 
     it("belongsTo with custom keys", () => {
@@ -472,6 +472,17 @@ describe("Select query builder", () => {
     afterEach(async () => {
         DI.clear();
     });
+
+    it("withRecursion simple", () =>{
+        const result = sqb().withRecursive("parent_id", "id").from("roles").columns(["id","parent_id", "slug"]).toDB();
+        expect(result.expression).to.equal("WITH RECURSIVE recursive_cte AS ( SELECT `id`,`parent_id`,`slug` FROM `roles` UNION ALL SELECT $recursive$.`id`,$recursive$.`parent_id`,$recursive$.`slug` FROM `roles` as $recursive$ INNER JOIN `recursive_cte` as `$recursive_cte$` ON `$recursive_cte$`.parent_id = `$recursive$`.id ) SELECT * FROM recursive_cte");
+    })
+
+    it("withRecursion with where", () =>{
+        const result = sqb().withRecursive("parent_id", "id").from("roles").columns(["id","parent_id", "slug"]).where("id", 2).toDB();
+        expect(result.expression).to.equal("WITH RECURSIVE recursive_cte AS ( SELECT `id`,`parent_id`,`slug` FROM `roles` WHERE id = ? UNION ALL SELECT $recursive$.`id`,$recursive$.`parent_id`,$recursive$.`slug` FROM `roles` as $recursive$ INNER JOIN `recursive_cte` as `$recursive_cte$` ON `$recursive_cte$`.parent_id = `$recursive$`.id ) SELECT * FROM recursive_cte");
+        expect(result.bindings).to.be.an("array").to.include(2);
+    })
 
     it("basic select", () => {
         const result = sqb().select("*").from("users").toDB();

@@ -29,6 +29,8 @@ import {
   IJoinBuilder,
   IndexQueryCompiler,
   IndexQueryBuilder,
+  IRecursiveCompiler,
+  IWithRecursiveBuilder,
 } from '@spinajs/orm';
 import { use } from 'typescript-mix';
 import { NewInstance, Inject, Container, Autoinject } from '@spinajs/di';
@@ -101,6 +103,28 @@ export class SqlOrderQueryByCompiler extends OrderByQueryCompiler {
       bindings,
       expression: stmt,
     };
+  }
+}
+@NewInstance()
+export class SqlWithRecursiveCompiler implements IRecursiveCompiler
+{
+  public recursive(builder: IWithRecursiveBuilder): ICompilerOutput {
+    const statement = builder.CteRecursive.build();
+
+    let exprr = "WITH RECURSIVE recursive_cte AS";
+    exprr += ` ( `;
+
+    exprr += statement.Statements[0];
+    exprr += ` UNION ALL `;
+    exprr += statement.Statements[1];
+
+    exprr += ` ) `;
+    exprr += "SELECT * FROM recursive_cte";
+
+    return {
+      bindings: statement.Bindings, 
+      expression: exprr
+    }
   }
 }
 
@@ -185,14 +209,15 @@ export class SqlJoinCompiler implements IJoinCompiler {
 // tslint:disable-next-line
 export interface SqlSelectQueryCompiler
   extends IWhereCompiler,
-    ILimitCompiler,
-    IColumnsCompiler,
-    ITableAliasCompiler,
-    IJoinCompiler {}
+  ILimitCompiler,
+  IColumnsCompiler,
+  ITableAliasCompiler,
+  IJoinCompiler,
+  IRecursiveCompiler { }
 
 @NewInstance()
 export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder> {
-  @use(SqlWhereCompiler, SqlLimitCompiler, SqlColumnsCompiler, TableAliasCompiler, SqlJoinCompiler)
+  @use(SqlWhereCompiler, SqlLimitCompiler, SqlColumnsCompiler, TableAliasCompiler, SqlJoinCompiler, SqlWithRecursiveCompiler)
   /// @ts-ignore
   private this: this;
 
@@ -204,6 +229,11 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
   }
 
   public compile(): ICompilerOutput {
+    
+    if(this._builder.CteRecursive){
+      return this.recursive(this._builder as IWithRecursiveBuilder);
+    }
+
     const columns = this.select();
     const from = this.from();
     const limit = this.limit(this._builder as ILimitBuilder);
@@ -257,7 +287,7 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
 }
 
 // tslint:disable-next-line
-export interface SqlUpdateQueryCompiler extends IWhereCompiler, ITableAliasCompiler {}
+export interface SqlUpdateQueryCompiler extends IWhereCompiler, ITableAliasCompiler { }
 
 @NewInstance()
 export class SqlUpdateQueryCompiler extends SqlQueryCompiler<UpdateQueryBuilder> {
@@ -307,7 +337,7 @@ export class SqlUpdateQueryCompiler extends SqlQueryCompiler<UpdateQueryBuilder>
 }
 
 // tslint:disable-next-line
-export interface SqlDeleteQueryCompiler extends IWhereCompiler, ITableAliasCompiler {}
+export interface SqlDeleteQueryCompiler extends IWhereCompiler, ITableAliasCompiler { }
 
 @NewInstance()
 export class SqlDeleteQueryCompiler extends SqlQueryCompiler<DeleteQueryBuilder> {
@@ -408,7 +438,7 @@ export class SqlIndexQueryCompiler extends IndexQueryCompiler {
       bindings: [],
       expression: `CREATE ${this._builder.Unique ? 'UNIQUE ' : ''}INDEX \`${this._builder.Name}\` ON ${
         this._builder.Table
-      } (${this._builder.Columns.map(c => `\`${c}\``).join(',')});`,
+        } (${this._builder.Columns.map(c => `\`${c}\``).join(',')});`,
     };
   }
 }
@@ -486,7 +516,7 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
 }
 
 // tslint:disable-next-line
-export interface SqlTableQueryCompiler extends ITableAliasCompiler {}
+export interface SqlTableQueryCompiler extends ITableAliasCompiler { }
 
 @NewInstance()
 @Inject(Container)
