@@ -12,6 +12,7 @@ import {
   ExistsQueryStatement,
   ColumnMethodStatement,
   WhereQueryStatement,
+  WithRecursiveStatement,
 } from '@spinajs/orm';
 import { WhereOperators } from '@spinajs/orm/lib/enums';
 
@@ -21,6 +22,31 @@ export class SqlRawStatement extends RawQueryStatement {
     return {
       Bindings: this._bindings,
       Statements: [`${this._query}`],
+    };
+  }
+}
+
+@NewInstance()
+export class SqlWithRecursiveStatement extends WithRecursiveStatement{
+
+  public build() : IQueryStatementResult
+  {
+    const initialQuery = this._query.clone().clearJoins().toDB();
+    const additionalQuery = this._query.clone().clearWhere().clearJoins().setAlias("$recursive$").innerJoin("recursive_cte","$recursive_cte$", this._rcKeyName, this._pkName).toDB();
+
+    let exprr = "WITH RECURSIVE recursive_cte";
+    exprr += `(`;
+
+    exprr += initialQuery.expression;
+    exprr += `UNION ALL`;
+    exprr += additionalQuery.expression;
+
+    exprr += `)`;
+    exprr += "SELECT * FROM recursive_cte";
+
+    return {
+      Bindings: initialQuery.bindings.concat(additionalQuery.bindings),
+      Statements: [exprr],
     };
   }
 }
