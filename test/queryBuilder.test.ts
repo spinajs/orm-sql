@@ -423,7 +423,7 @@ describe("Relations query builder", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false
-            }]);
+            }])
         }));
 
         DI.resolve(LogModule);
@@ -451,10 +451,7 @@ describe("Relations query builder", () => {
 
     it("belongsTo with custom keys", () => {
         const result = RelationModel.where("Id", 1).populate("Relation2").toDB();
-
-
         expect(result.expression).to.equal("SELECT $RelationModel$.*,$Relation2$.`Id` as `$Relation2$.Id`,$Relation2$.`RelationProperty` as `$Relation2$.RelationProperty` FROM `RelationTable` as $RelationModel$ LEFT JOIN `RelationTable2` as `$Relation2$` ON `$Relation2$`.fK_Id = `$RelationModel$`.pK_Id WHERE $RelationModel$.Id = ?");
-
     });
 });
 
