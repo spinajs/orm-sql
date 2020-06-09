@@ -530,7 +530,7 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
   }
 
   protected into() {
-    return `INSERT INTO \`${this._builder.Table}\``;
+    return `INSERT${this._builder.Ignore ? " IGNORE" : ""} INTO \`${this._builder.Table}\``;
   }
 }
 

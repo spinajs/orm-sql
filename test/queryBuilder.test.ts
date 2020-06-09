@@ -685,6 +685,17 @@ describe("insert query builder", () => {
         expect(result.bindings).to.be.an("array").to.include.members([1, "spine@spine.pl", 2, true, "spine2@spine.pl"]);
     })
 
+    it("insert with ignore", () => {
+
+        const result = iqb().into("users").values({
+            id: 1, active: true, email: "spine@spine.pl"
+        }).ignore().toDB();
+
+
+        expect(result.expression).to.equal("INSERT IGNORE INTO `users` (`id`,`active`,`email`) VALUES (?,?,?)");
+        expect(result.bindings).to.be.an("array").to.include.members([1, true, "spine@spine.pl", "spine@spine.pl", true]);
+    });
+
     it("insert with on duplicate", () => {
 
         const result = iqb().into("users").values({
