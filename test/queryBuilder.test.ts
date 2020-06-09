@@ -1,4 +1,4 @@
-import { IndexQueryBuilder } from '@spinajs/orm';
+import { IndexQueryBuilder, ReferentialAction } from '@spinajs/orm';
 import { expect } from 'chai';
 import 'mocha';
 import { SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, Orm, IWhereBuilder } from '@spinajs/orm';
@@ -712,6 +712,24 @@ describe("schema building", () => {
         DI.clear();
     });
 
+    it("table with one foreigk key", () =>{
+        const result = schqb().createTable("users", (table: TableQueryBuilder) => {
+            table.int("foo").notNull().primaryKey().autoIncrement();
+            table.foreignKey("parent_id").references("group","id").onDelete(ReferentialAction.Cascade).onUpdate(ReferentialAction.Cascade);
+        }).toDB();
+
+        expect(result.expression).to.eq("CREATE TABLE `users` (`foo` INT NOT NULL AUTO_INCREMENT , PRIMARY KEY (`foo`),FOREIGN KEY (parent_id) REFERENCES group(id) ON DELETE CASCADE ON UPDATE CASCADE)");
+    })
+
+    it("table with default referential action", () =>{
+        const result = schqb().createTable("users", (table: TableQueryBuilder) => {
+            table.int("foo").notNull().primaryKey().autoIncrement();
+            table.foreignKey("parent_id").references("group","id");
+        }).toDB();
+
+        expect(result.expression).to.eq("CREATE TABLE `users` (`foo` INT NOT NULL AUTO_INCREMENT , PRIMARY KEY (`foo`),FOREIGN KEY (parent_id) REFERENCES group(id) ON DELETE NO ACTION ON UPDATE NO ACTION)");
+    })
+
     it("column with one primary keys", () => {
         const result = schqb().createTable("users", (table: TableQueryBuilder) => {
             table.int("foo").notNull().primaryKey().autoIncrement()
@@ -830,6 +848,7 @@ describe("schema building", () => {
             table.dateTime("foo");
             table.timestamp("foo");
             table.json("foo");
+            table.set("foo", ["bar", "baz"]);
         }).toDB();
 
         expect(result.expression).to.contain("`foo` SMALLINT");
@@ -852,6 +871,6 @@ describe("schema building", () => {
         expect(result.expression).to.contain("`foo` DATETIME");
         expect(result.expression).to.contain("`foo` TIMESTAMP");
         expect(result.expression).to.contain("`foo` JSON");
-
+        expect(result.expression).to.contain("`foo` SET('bar','baz')");
     })
 });

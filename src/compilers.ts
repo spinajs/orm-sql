@@ -31,6 +31,8 @@ import {
   IndexQueryBuilder,
   IRecursiveCompiler,
   IWithRecursiveBuilder,
+  ForeignKeyBuilder,
+  ForeignKeyQueryCompiler
 } from '@spinajs/orm';
 import { use } from 'typescript-mix';
 import { NewInstance, Inject, Container, Autoinject } from '@spinajs/di';
@@ -106,8 +108,7 @@ export class SqlOrderQueryByCompiler extends OrderByQueryCompiler {
   }
 }
 @NewInstance()
-export class SqlWithRecursiveCompiler implements IRecursiveCompiler
-{
+export class SqlWithRecursiveCompiler implements IRecursiveCompiler {
   public recursive(builder: IWithRecursiveBuilder): ICompilerOutput {
     const statement = builder.CteRecursive.build();
 
@@ -122,7 +123,25 @@ export class SqlWithRecursiveCompiler implements IRecursiveCompiler
     exprr += "SELECT * FROM recursive_cte";
 
     return {
-      bindings: statement.Bindings, 
+      bindings: statement.Bindings,
+      expression: exprr
+    }
+  }
+}
+
+@NewInstance()
+export class SqlForeignKeyQueryCompiler implements ForeignKeyQueryCompiler {
+  constructor(protected _builder: ForeignKeyBuilder) {
+    if (!_builder) {
+      throw new Error('foreign key query builder cannot be null');
+    }
+  }
+
+  public compile(): ICompilerOutput {
+    const exprr = `FOREIGN KEY (${this._builder.ForeignKeyField}) REFERENCES ${this._builder.Table}(${this._builder.PrimaryKey}) ON DELETE ${this._builder.OnDeleteAction} ON UPDATE ${this._builder.OnUpdateAction}`;
+
+    return {
+      bindings: [],
       expression: exprr
     }
   }
@@ -229,8 +248,8 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
   }
 
   public compile(): ICompilerOutput {
-    
-    if(this._builder.CteRecursive){
+
+    if (this._builder.CteRecursive) {
       return this.recursive(this._builder as IWithRecursiveBuilder);
     }
 
@@ -532,17 +551,23 @@ export class SqlTableQueryCompiler extends TableQueryCompiler implements SqlTabl
   public compile(): ICompilerOutput {
     const _table = this._table();
     const _columns = this._columns();
-    const _pkeys = this._primaryKeys();
+    const _keys = [this._primaryKeys(), this._foreignKeys()];
 
     return {
       bindings: [],
-      expression: `${_table} (${_columns} ${_pkeys})`,
+      expression: `${_table} (${_columns} ${_keys.filter(k => k && k !== '').join(',')})`,
     };
   }
 
   protected _columns() {
     return this.builder.Columns.map(c => {
       return this.container.resolve(ColumnQueryCompiler, [c]).compile().expression;
+    }).join(',');
+  }
+
+  protected _foreignKeys() {
+    return this.builder.ForeignKeys.map(f => {
+      return this.container.resolve(ForeignKeyQueryCompiler, [f]).compile().expression;
     }).join(',');
   }
 
@@ -577,6 +602,9 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
     _stmt.push(`\`${this.builder.Name}\``);
 
     switch (this.builder.Type) {
+      case 'set':
+        _stmt.push(`SET(${this.builder.Args[0].map((a: string) => `'${a}\'`).join(',')})`);
+        break;
       case 'string':
         const _len = this.builder.Args[0] ? this.builder.Args[0] : 255;
         _stmt.push(`VARCHAR(${_len})`);

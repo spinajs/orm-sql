@@ -19,7 +19,8 @@ import {
   JoinStatement,
   IndexQueryCompiler,
   WithRecursiveStatement,
-  RecursiveQueryCompiler
+  RecursiveQueryCompiler,
+  ForeignKeyQueryCompiler
 } from '@spinajs/orm';
 import { IContainer } from '@spinajs/di';
 import {
@@ -45,6 +46,7 @@ import {
   SqlOnDuplicateQueryCompiler,
   SqlIndexQueryCompiler,
   SqlWithRecursiveCompiler,
+  SqlForeignKeyQueryCompiler,
 } from './compilers';
 
 export * from './compilers';
@@ -77,5 +79,6 @@ export abstract class SqlDriver extends OrmDriver {
     this.Container.register(SqlOrderQueryByCompiler).as(OrderByQueryCompiler);
     this.Container.register(SqlOnDuplicateQueryCompiler).as(OnDuplicateQueryCompiler);
     this.Container.register(SqlIndexQueryCompiler).as(IndexQueryCompiler);
+    this.Container.register(SqlForeignKeyQueryCompiler).as(ForeignKeyQueryCompiler);
   }
 }

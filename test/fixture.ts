@@ -1,6 +1,6 @@
 import { SqlJoinStatement, SqlWithRecursiveStatement } from './../src/statements';
-import { SqlOnDuplicateQueryCompiler, SqlIndexQueryCompiler, SqlWithRecursiveCompiler } from './../src/compilers';
-import { OrmDriver, IColumnDescriptor, InStatement, RawQueryStatement, BetweenStatement, WhereStatement, ColumnStatement, ColumnMethodStatement, ExistsQueryStatement, ColumnRawStatement, WhereQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, DeleteQueryCompiler, InsertQueryCompiler, TableQueryCompiler, ColumnQueryCompiler, OrderByQueryCompiler, OnDuplicateQueryCompiler, JoinStatement, IndexQueryCompiler, RecursiveQueryCompiler, WithRecursiveStatement } from "@spinajs/orm";
+import { SqlOnDuplicateQueryCompiler, SqlIndexQueryCompiler, SqlWithRecursiveCompiler, SqlForeignKeyQueryCompiler } from './../src/compilers';
+import { OrmDriver, IColumnDescriptor, InStatement, RawQueryStatement, BetweenStatement, WhereStatement, ColumnStatement, ColumnMethodStatement, ExistsQueryStatement, ColumnRawStatement, WhereQueryStatement, SelectQueryCompiler, UpdateQueryCompiler, DeleteQueryCompiler, InsertQueryCompiler, TableQueryCompiler, ColumnQueryCompiler, OrderByQueryCompiler, OnDuplicateQueryCompiler, JoinStatement, IndexQueryCompiler, RecursiveQueryCompiler, WithRecursiveStatement, ForeignKeyQueryCompiler } from "@spinajs/orm";
 import { IContainer } from "@spinajs/di";
 import { SqlInStatement, SqlRawStatement, SqlBetweenStatement, SqlWhereStatement, SqlColumnStatement, SqlColumnMethodStatement, SqlExistsQueryStatement, SqlColumnRawStatement, SqlWhereQueryStatement } from "../src/statements";
 import { SqlSelectQueryCompiler, SqlUpdateQueryCompiler, SqlDeleteQueryCompiler, SqlInsertQueryCompiler, SqlTableQueryCompiler, SqlColumnQueryCompiler, SqlOrderQueryByCompiler } from "../src/compilers";
@@ -65,6 +65,7 @@ export class FakeSqliteDriver extends OrmDriver {
         this.Container.register(SqlOrderQueryByCompiler).as(OrderByQueryCompiler);
         this.Container.register(SqlOnDuplicateQueryCompiler).as(OnDuplicateQueryCompiler);
         this.Container.register(SqlIndexQueryCompiler).as(IndexQueryCompiler);
+        this.Container.register(SqlForeignKeyQueryCompiler).as(ForeignKeyQueryCompiler);
 
 
 
