@@ -131,7 +131,7 @@ export class SqlColumnStatement extends ColumnStatement {
     }
 
     if (this._tableAlias) {
-      exprr = `${this._tableAlias}.${exprr}`;
+      exprr = `\`${this._tableAlias}\`.${exprr}`;
     }
 
     return {

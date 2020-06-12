@@ -53,7 +53,7 @@ class TableAliasCompiler implements ITableAliasCompiler {
     table += `\`${builder.Table}\``;
 
     if (builder.TableAlias) {
-      table += ` as ${builder.TableAlias}`;
+      table += ` as \`${builder.TableAlias}\``;
     }
 
     return table;
@@ -509,7 +509,7 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
 
         const descriptor = (this._builder.getColumns()[i] as ColumnStatement).Descriptor;
 
-        if (descriptor && !descriptor.Nullable && !v) {
+        if (descriptor && !descriptor.Nullable && !v && !descriptor.AutoIncrement) {
           throw new InvalidArgument(`value column ${descriptor.Name} cannot be null`);
         }
 

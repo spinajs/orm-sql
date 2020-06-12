@@ -8,6 +8,7 @@ import { SpinaJsDefaultLog, LogModule } from "@spinajs/log";
 import { ConnectionConf, FakeSqliteDriver } from './fixture';
 import { RelationModel } from './Models/RelationModel';
 import sinon from 'sinon';
+import { RelationModel3 } from './Models/RelationModel3';
 
 
 
@@ -85,7 +86,7 @@ describe("Query builder generic", () => {
         const query = sqb().select("*").from("users", "u");
 
         expect(query.TableAlias).to.equal("u");
-        expect(query.toDB().expression).to.equal("SELECT u.* FROM `users` as u");
+        expect(query.toDB().expression).to.equal("SELECT `u`.* FROM `users` as `u`");
     })
 
     it("ensure table presents", () => {
@@ -424,6 +425,86 @@ describe("Relations query builder", () => {
                 Schema: "sqlite",
                 Unique: false
             }])
+        })).withArgs("JoinTable", undefined).returns(new Promise(res => {
+            res([{
+                Type: "INT",
+                MaxLength: 0,
+                Comment: "",
+                DefaultValue: null,
+                NativeType: "INT",
+                Unsigned: false,
+                Nullable: true,
+                PrimaryKey: true,
+                AutoIncrement: true,
+                Name: "Id",
+                Converter: null,
+                Schema: "sqlite",
+                Unique: false
+            },
+            {
+                Type: "INT",
+                MaxLength: 0,
+                Comment: "",
+                DefaultValue: null,
+                NativeType: "INT",
+                Unsigned: false,
+                Nullable: true,
+                PrimaryKey: false,
+                AutoIncrement: false,
+                Name: "owner_id",
+                Converter: null,
+                Schema: "sqlite",
+                Unique: false
+            },
+            {
+                Type: "INT",
+                MaxLength: 0,
+                Comment: "",
+                DefaultValue: null,
+                NativeType: "INT",
+                Unsigned: false,
+                Nullable: true,
+                PrimaryKey: false,
+                AutoIncrement: false,
+                Name: "target_id",
+                Converter: null,
+                Schema: "sqlite",
+                Unique: false
+            }
+            ])
+        })).withArgs("RelationTable4", undefined).returns(new Promise(res => {
+            res([{
+                Type: "INT",
+                MaxLength: 0,
+                Comment: "",
+                DefaultValue: null,
+                NativeType: "INT",
+                Unsigned: false,
+                Nullable: true,
+                PrimaryKey: true,
+                AutoIncrement: true,
+                Name: "Id",
+                Converter: null,
+                Schema: "sqlite",
+                Unique: false
+            },
+            {
+                Type: "VARCHAR",
+                MaxLength: 0,
+                Comment: "",
+                DefaultValue: null,
+                NativeType: "VARCHAR",
+                Unsigned: false,
+                Nullable: true,
+                PrimaryKey: false,
+                AutoIncrement: false,
+                Name: "Model4Property",
+                Converter: null,
+                Schema: "sqlite",
+                Unique: false
+            },
+
+            ])
         }));
 
         DI.resolve(LogModule);
@@ -438,7 +519,7 @@ describe("Relations query builder", () => {
     it("belongsTo simple", () => {
         const result = RelationModel.where("Id", 1).populate("Relation").toDB();
 
-        expect(result.expression).to.equal("SELECT $RelationModel$.*,$Relation$.`Id` as `$Relation$.Id`,$Relation$.`RelationProperty` as `$Relation$.RelationProperty` FROM `RelationTable` as $RelationModel$ LEFT JOIN `RelationTable2` as `$Relation$` ON `$Relation$`.Id = `$RelationModel$`.relation_id WHERE $RelationModel$.Id = ?");
+        expect(result.expression).to.equal("SELECT `$RelationModel$`.*,`$Relation$`.`Id` as `$Relation$.Id`,`$Relation$`.`RelationProperty` as `$Relation$.RelationProperty` FROM `RelationTable` as `$RelationModel$` LEFT JOIN `RelationTable2` as `$Relation$` ON `$Relation$`.Id = `$RelationModel$`.relation_id WHERE $RelationModel$.Id = ?");
     });
 
     it("belongsTo nested", () => {
@@ -446,12 +527,35 @@ describe("Relations query builder", () => {
             this.populate("Relation3");
         }).toDB();
 
-        expect(result.expression).to.equal("SELECT $RelationModel$.*,$RelationModel2$.`Id` as `$Relation$.Id`,$RelationModel2$.`RelationProperty` as `$Relation$.RelationProperty`,$Relation$.$Relation3$.`Id` as `$Relation$.$Relation3$.Id`,$Relation$.$Relation3$.`RelationProperty3` as `$Relation$.$Relation3$.RelationProperty3` FROM `RelationTable` as $RelationModel$ LEFT JOIN `RelationTable2` as `$Relation$` ON `$Relation$`.Id = `$RelationModel$`.relation_id LEFT JOIN `RelationTable3` as `$Relation$.$Relation3$` ON `$Relation$.$Relation3$`.Id = `$RelationModel2$`.relation3_id WHERE $RelationModel$.Id = ?");
+        expect(result.expression).to.equal("SELECT `$RelationModel$`.*,`$RelationModel2$`.`Id` as `$Relation$.Id`,`$RelationModel2$`.`RelationProperty` as `$Relation$.RelationProperty`,`$Relation$.$Relation3$`.`Id` as `$Relation$.$Relation3$.Id`,`$Relation$.$Relation3$`.`RelationProperty3` as `$Relation$.$Relation3$.RelationProperty3` FROM `RelationTable` as `$RelationModel$` LEFT JOIN `RelationTable2` as `$Relation$` ON `$Relation$`.Id = `$RelationModel$`.relation_id LEFT JOIN `RelationTable3` as `$Relation$.$Relation3$` ON `$Relation$.$Relation3$`.Id = `$RelationModel2$`.relation3_id WHERE $RelationModel$.Id = ?");
     });
 
     it("belongsTo with custom keys", () => {
         const result = RelationModel.where("Id", 1).populate("Relation2").toDB();
-        expect(result.expression).to.equal("SELECT $RelationModel$.*,$Relation2$.`Id` as `$Relation2$.Id`,$Relation2$.`RelationProperty` as `$Relation2$.RelationProperty` FROM `RelationTable` as $RelationModel$ LEFT JOIN `RelationTable2` as `$Relation2$` ON `$Relation2$`.fK_Id = `$RelationModel$`.pK_Id WHERE $RelationModel$.Id = ?");
+        expect(result.expression).to.equal("SELECT `$RelationModel$`.*,`$Relation2$`.`Id` as `$Relation2$.Id`,`$Relation2$`.`RelationProperty` as `$Relation2$.RelationProperty` FROM `RelationTable` as `$RelationModel$` LEFT JOIN `RelationTable2` as `$Relation2$` ON `$Relation2$`.fK_Id = `$RelationModel$`.pK_Id WHERE $RelationModel$.Id = ?");
+    });
+
+    it("hasManyToMany", async () => {
+
+        const relStub = sinon.stub(FakeSqliteDriver.prototype, "execute").onFirstCall().returns(new Promise((res) => {
+            res([{
+                Id: 1
+            },
+            {
+                Id: 2
+            }])
+        })).onSecondCall().returns(new Promise((res) => {
+            res([]);
+        }));
+
+
+        const result = await RelationModel3.all().populate("Models");
+
+        expect(relStub.calledTwice).to.be.true;
+        expect(result).to.be.not.null;
+        expect(relStub.firstCall.args[0]).to.equal("SELECT * FROM `RelationTable3`");
+        expect(relStub.secondCall.args[0]).to.equal("SELECT `$JoinTable$`.`Id`,`$JoinTable$`.`owner_id`,`$JoinTable$`.`target_id`,`$Models$`.`Id` as `$Models$.Id`,`$Models$`.`Model4Property` as `$Models$.Model4Property` FROM `JoinTable` as `$JoinTable$` LEFT JOIN `RelationTable4` as `$Models$` ON `$Models$`.Id = `$JoinTable$`.target_id WHERE owner_id IN (?,?)");
+
     });
 });
 
@@ -470,14 +574,14 @@ describe("Select query builder", () => {
         DI.clear();
     });
 
-    it("withRecursion simple", () =>{
-        const result = sqb().withRecursive("parent_id", "id").from("roles").columns(["id","parent_id", "slug"]).toDB();
-        expect(result.expression).to.equal("WITH RECURSIVE recursive_cte AS ( SELECT `id`,`parent_id`,`slug` FROM `roles` UNION ALL SELECT $recursive$.`id`,$recursive$.`parent_id`,$recursive$.`slug` FROM `roles` as $recursive$ INNER JOIN `recursive_cte` as `$recursive_cte$` ON `$recursive_cte$`.parent_id = `$recursive$`.id ) SELECT * FROM recursive_cte");
+    it("withRecursion simple", () => {
+        const result = sqb().withRecursive("parent_id", "id").from("roles").columns(["id", "parent_id", "slug"]).toDB();
+        expect(result.expression).to.equal("WITH RECURSIVE recursive_cte AS ( SELECT `id`,`parent_id`,`slug` FROM `roles` UNION ALL SELECT `$recursive$`.`id`,`$recursive$`.`parent_id`,`$recursive$`.`slug` FROM `roles` as `$recursive$` INNER JOIN `recursive_cte` as `$recursive_cte$` ON `$recursive_cte$`.parent_id = `$recursive$`.id ) SELECT * FROM recursive_cte");
     })
 
-    it("withRecursion with where", () =>{
-        const result = sqb().withRecursive("parent_id", "id").from("roles").columns(["id","parent_id", "slug"]).where("id", 2).toDB();
-        expect(result.expression).to.equal("WITH RECURSIVE recursive_cte AS ( SELECT `id`,`parent_id`,`slug` FROM `roles` WHERE id = ? UNION ALL SELECT $recursive$.`id`,$recursive$.`parent_id`,$recursive$.`slug` FROM `roles` as $recursive$ INNER JOIN `recursive_cte` as `$recursive_cte$` ON `$recursive_cte$`.parent_id = `$recursive$`.id ) SELECT * FROM recursive_cte");
+    it("withRecursion with where", () => {
+        const result = sqb().withRecursive("parent_id", "id").from("roles").columns(["id", "parent_id", "slug"]).where("id", 2).toDB();
+        expect(result.expression).to.equal("WITH RECURSIVE recursive_cte AS ( SELECT `id`,`parent_id`,`slug` FROM `roles` WHERE id = ? UNION ALL SELECT `$recursive$`.`id`,`$recursive$`.`parent_id`,`$recursive$`.`slug` FROM `roles` as `$recursive$` INNER JOIN `recursive_cte` as `$recursive_cte$` ON `$recursive_cte$`.parent_id = `$recursive$`.id ) SELECT * FROM recursive_cte");
         expect(result.bindings).to.be.an("array").to.include(2);
     })
 
@@ -723,19 +827,19 @@ describe("schema building", () => {
         DI.clear();
     });
 
-    it("table with one foreigk key", () =>{
+    it("table with one foreigk key", () => {
         const result = schqb().createTable("users", (table: TableQueryBuilder) => {
             table.int("foo").notNull().primaryKey().autoIncrement();
-            table.foreignKey("parent_id").references("group","id").onDelete(ReferentialAction.Cascade).onUpdate(ReferentialAction.Cascade);
+            table.foreignKey("parent_id").references("group", "id").onDelete(ReferentialAction.Cascade).onUpdate(ReferentialAction.Cascade);
         }).toDB();
 
         expect(result.expression).to.eq("CREATE TABLE `users` (`foo` INT NOT NULL AUTO_INCREMENT , PRIMARY KEY (`foo`),FOREIGN KEY (parent_id) REFERENCES group(id) ON DELETE CASCADE ON UPDATE CASCADE)");
     })
 
-    it("table with default referential action", () =>{
+    it("table with default referential action", () => {
         const result = schqb().createTable("users", (table: TableQueryBuilder) => {
             table.int("foo").notNull().primaryKey().autoIncrement();
-            table.foreignKey("parent_id").references("group","id");
+            table.foreignKey("parent_id").references("group", "id");
         }).toDB();
 
         expect(result.expression).to.eq("CREATE TABLE `users` (`foo` INT NOT NULL AUTO_INCREMENT , PRIMARY KEY (`foo`),FOREIGN KEY (parent_id) REFERENCES group(id) ON DELETE NO ACTION ON UPDATE NO ACTION)");
