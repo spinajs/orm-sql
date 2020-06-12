@@ -509,6 +509,10 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
           return 'DEFAULT';
         }
 
+        if (v === null){
+          return 'NULL';
+        }
+
         bindings.push(v);
         return '?';
       });

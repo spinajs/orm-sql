@@ -82,7 +82,7 @@ export class ConnectionConf extends Configuration {
             }
         },
         db: {
-            connections: [
+            Connections: [
                 {
                     Driver: "sqlite",
                     Filename: "foo.sqlite",
