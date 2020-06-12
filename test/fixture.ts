@@ -39,6 +39,8 @@ export class FakeSqliteDriver extends OrmDriver {
     }
 
     public resolve(container: IContainer) {
+        super.resolve(container);
+
         this.Container = container.child();
 
 
@@ -66,10 +68,6 @@ export class FakeSqliteDriver extends OrmDriver {
         this.Container.register(SqlOnDuplicateQueryCompiler).as(OnDuplicateQueryCompiler);
         this.Container.register(SqlIndexQueryCompiler).as(IndexQueryCompiler);
         this.Container.register(SqlForeignKeyQueryCompiler).as(ForeignKeyQueryCompiler);
-
-
-
-
     }
 }
 

@@ -496,6 +496,7 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
 
   protected values() {
 
+
     if (this._builder.Values.length === 0) {
       throw new InvalidArgument("values count invalid");
     }
@@ -504,12 +505,19 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
     let data = 'VALUES ';
 
     data += this._builder.Values.map(val => {
-      const toInsert = val.map(v => {
+      const toInsert = val.map((v, i) => {
+
+        const descriptor = (this._builder.getColumns()[i] as ColumnStatement).Descriptor;
+
+        if (descriptor && !descriptor.Nullable && !v) {
+          throw new InvalidArgument(`value column ${descriptor.Name} cannot be null`);
+        }
+
         if (v === undefined) {
           return 'DEFAULT';
         }
 
-        if (v === null){
+        if (v === null) {
           return 'NULL';
         }
 
