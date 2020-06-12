@@ -1,4 +1,4 @@
-import { InvalidOperation } from '@spinajs/exceptions';
+import { InvalidOperation, InvalidArgument } from '@spinajs/exceptions';
 import {
   ColumnStatement,
   OnDuplicateQueryBuilder,
@@ -495,6 +495,11 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
   }
 
   protected values() {
+
+    if (this._builder.Values.length === 0) {
+      throw new InvalidArgument("values count invalid");
+    }
+
     const bindings: any[] = [];
     let data = 'VALUES ';
 
@@ -517,6 +522,7 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
   }
 
   protected columns() {
+
     const columns = this._builder
       .getColumns()
       .map(c => {
@@ -525,6 +531,10 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
       .map(c => {
         return `\`${c}\``;
       });
+
+    if (columns.length === 0) {
+      throw new InvalidArgument("invalid column count");
+    }
 
     return `(` + columns.join(',') + ')';
   }
