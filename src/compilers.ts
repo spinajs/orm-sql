@@ -643,6 +643,9 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
         break;
       case 'enum':
         break;
+      case "binary":
+        _stmt.push(`BINARY(${this.builder.Args[0] ?? 255}`);
+      break;
       default:
         _stmt.push(this.builder.Type.toUpperCase());
         break;
@@ -686,7 +689,7 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
     if (_.isString(this.builder.Default)) {
       _stmt = `DEFAULT '${this.builder.Default.trim()}'`;
     } else if (_.isNumber(this.builder.Default)) {
-      _stmt = `DEFAULT ${this.builder.Default}`;
+      _stmt = `DEFAULT ${ this.builder.Default }`;
     } else if (this.builder.Default instanceof RawQuery) {
       _stmt = `DEFAULT ${(this.builder.Default as RawQuery).Query}`;
     }
