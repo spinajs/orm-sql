@@ -333,7 +333,8 @@ describe("Relations query builder", () => {
                 Name: "Id",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
             },
             {
                 Type: "INT",
@@ -348,7 +349,8 @@ describe("Relations query builder", () => {
                 Name: "relation_id",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
             },
             {
                 Type: "INT",
@@ -363,7 +365,8 @@ describe("Relations query builder", () => {
                 Name: "relation2_id",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
             }]);
         })).withArgs("RelationTable2", undefined).returns(new Promise(res => {
             res([{
@@ -379,7 +382,8 @@ describe("Relations query builder", () => {
                 Name: "Id",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
             }, {
                 Type: "VARCHAR",
                 MaxLength: 0,
@@ -393,7 +397,8 @@ describe("Relations query builder", () => {
                 Name: "RelationProperty",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
             }]);
         })).withArgs("RelationTable3", undefined).returns(new Promise(res => {
             res([{
@@ -409,7 +414,8 @@ describe("Relations query builder", () => {
                 Name: "Id",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
             }, {
                 Type: "VARCHAR",
                 MaxLength: 0,
@@ -423,7 +429,8 @@ describe("Relations query builder", () => {
                 Name: "RelationProperty3",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
             }])
         })).withArgs("JoinTable", undefined).returns(new Promise(res => {
             res([{
@@ -439,7 +446,8 @@ describe("Relations query builder", () => {
                 Name: "Id",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
             },
             {
                 Type: "INT",
@@ -454,7 +462,8 @@ describe("Relations query builder", () => {
                 Name: "owner_id",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
             },
             {
                 Type: "INT",
@@ -469,7 +478,8 @@ describe("Relations query builder", () => {
                 Name: "target_id",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
             }
             ])
         })).withArgs("RelationTable4", undefined).returns(new Promise(res => {
@@ -486,7 +496,8 @@ describe("Relations query builder", () => {
                 Name: "Id",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
             },
             {
                 Type: "VARCHAR",
@@ -501,7 +512,8 @@ describe("Relations query builder", () => {
                 Name: "Model4Property",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
             },
 
             ])

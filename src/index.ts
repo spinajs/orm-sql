@@ -1,3 +1,4 @@
+import { ColumnQueryCompiler } from '@spinajs/orm';
 import {
   OrmDriver,
   InStatement,
@@ -47,6 +48,7 @@ import {
   SqlIndexQueryCompiler,
   SqlWithRecursiveCompiler,
   SqlForeignKeyQueryCompiler,
+  SqlColumnQueryCompiler,
 } from './compilers';
 
 export * from './compilers';
@@ -80,5 +82,6 @@ export abstract class SqlDriver extends OrmDriver {
     this.Container.register(SqlOnDuplicateQueryCompiler).as(OnDuplicateQueryCompiler);
     this.Container.register(SqlIndexQueryCompiler).as(IndexQueryCompiler);
     this.Container.register(SqlForeignKeyQueryCompiler).as(ForeignKeyQueryCompiler);
+    this.Container.register(SqlColumnQueryCompiler).as(ColumnQueryCompiler);
   }
 }

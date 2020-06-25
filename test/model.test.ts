@@ -1,3 +1,4 @@
+import { UuidModel } from './Models/UuidModel';
 import { DI } from "@spinajs/di";
 import { ConnectionConf, FakeSqliteDriver } from "./fixture";
 import { Configuration } from "@spinajs/configuration";
@@ -45,6 +46,16 @@ describe("model generated queries", () => {
 
     });
 
+    it("model insert with uuid from static function", async () => {
+
+        const query = UuidModel.insert(new UuidModel());
+
+        expect(query.toDB().expression).to.eq("INSERT INTO `TestTable2` (`Id`) VALUES (?)");
+        expect(typeof query.toDB().bindings[0]).to.eq("string");
+        expect(query.toDB().bindings[0].length).to.eq(32);
+
+    });
+
     it("insert should throw when fields are null", async () => {
         const tableInfoStub = sinon.stub(FakeSqliteDriver.prototype, "tableInfo");
         tableInfoStub.withArgs("TestTable2", undefined).returns(new Promise(res => {
@@ -61,7 +72,8 @@ describe("model generated queries", () => {
                 Name: "Id",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
             },
             {
                 Type: "VARCHAR",
@@ -76,7 +88,9 @@ describe("model generated queries", () => {
                 Name: "Bar",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
+
             },
             {
                 Type: "VARCHAR",
@@ -91,7 +105,9 @@ describe("model generated queries", () => {
                 Name: "Far",
                 Converter: null,
                 Schema: "sqlite",
-                Unique: false
+                Unique: false,
+                Uuid: false
+
             }]);
         }));
 
