@@ -22,7 +22,7 @@ import {
   IndexQueryCompiler,
   WithRecursiveStatement,
   RecursiveQueryCompiler,
-  ForeignKeyQueryCompiler
+  ForeignKeyQueryCompiler,
 } from '@spinajs/orm';
 import { IContainer } from '@spinajs/di';
 import {
@@ -72,7 +72,6 @@ export abstract class SqlDriver extends OrmDriver {
     this.Container.register(SqlWhereQueryStatement).as(WhereQueryStatement);
     this.Container.register(SqlWithRecursiveStatement).as(WithRecursiveStatement);
 
-
     this.Container.register(SqlWithRecursiveCompiler).as(RecursiveQueryCompiler);
     this.Container.register(SqlSelectQueryCompiler).as(SelectQueryCompiler);
     this.Container.register(SqlUpdateQueryCompiler).as(UpdateQueryCompiler);
@@ -86,6 +85,5 @@ export abstract class SqlDriver extends OrmDriver {
     this.Container.register(SqlColumnQueryCompiler).as(ColumnQueryCompiler);
 
     this.Container.register(SqlSetConverter).as(SetValueConverter);
-
   }
 }

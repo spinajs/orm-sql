@@ -27,13 +27,23 @@ export class SqlRawStatement extends RawQueryStatement {
 }
 
 @NewInstance()
-export class SqlWithRecursiveStatement extends WithRecursiveStatement{
-
-  public build() : IQueryStatementResult
-  {
-    const initialQuery = this._query.clone().clearJoins().toDB();
-    const additionalQuery = this._query.clone().clearWhere().clearJoins().setAlias("$recursive$").innerJoin("recursive_cte","$recursive_cte$", this._pkName, this._rcKeyName).toDB();
-    const cte_columns = this._query.getColumns().map( (c : ColumnStatement)=> c.Column).join(",");
+export class SqlWithRecursiveStatement extends WithRecursiveStatement {
+  public build(): IQueryStatementResult {
+    const initialQuery = this._query
+      .clone()
+      .clearJoins()
+      .toDB();
+    const additionalQuery = this._query
+      .clone()
+      .clearWhere()
+      .clearJoins()
+      .setAlias('$recursive$')
+      .innerJoin('recursive_cte', '$recursive_cte$', this._pkName, this._rcKeyName)
+      .toDB();
+    const cte_columns = this._query
+      .getColumns()
+      .map((c: ColumnStatement) => c.Column)
+      .join(',');
 
     return {
       Bindings: initialQuery.bindings.concat(additionalQuery.bindings),
@@ -60,8 +70,7 @@ export class SqlWhereStatement extends WhereStatement {
     const binding = this._operator === WhereOperators.NOT_NULL || this._operator === WhereOperators.NULL ? '' : ' ?';
 
     let column = this._column;
-    if(this._tableAlias)
-    {
+    if (this._tableAlias) {
       column = `${this._tableAlias}.${this._column}`;
     }
 
@@ -88,12 +97,11 @@ export class SqlJoinStatement extends JoinStatement {
 
     if (this._alias) {
       table = `\`${this._table}\` as \`${this._alias}\``;
-      foreignKey = `\`${this._tableAlias}\`.${this._foreignKey}`
+      foreignKey = `\`${this._tableAlias}\`.${this._foreignKey}`;
     }
 
-    if(this._tableAlias)
-    {
-      primaryKey = `\`${this._alias}\`.${this._primaryKey}`
+    if (this._tableAlias) {
+      primaryKey = `\`${this._alias}\`.${this._primaryKey}`;
     }
 
     return {

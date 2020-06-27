@@ -32,7 +32,7 @@ import {
   IRecursiveCompiler,
   IWithRecursiveBuilder,
   ForeignKeyBuilder,
-  ForeignKeyQueryCompiler
+  ForeignKeyQueryCompiler,
 } from '@spinajs/orm';
 import { use } from 'typescript-mix';
 import { NewInstance, Inject, Container, Autoinject } from '@spinajs/di';
@@ -120,12 +120,12 @@ export class SqlWithRecursiveCompiler implements IRecursiveCompiler {
     exprr += statement.Statements[2];
 
     exprr += ` ) `;
-    exprr += "SELECT * FROM recursive_cte";
+    exprr += 'SELECT * FROM recursive_cte';
 
     return {
       bindings: statement.Bindings,
-      expression: exprr
-    }
+      expression: exprr,
+    };
   }
 }
 
@@ -142,8 +142,8 @@ export class SqlForeignKeyQueryCompiler implements ForeignKeyQueryCompiler {
 
     return {
       bindings: [],
-      expression: exprr
-    }
+      expression: exprr,
+    };
   }
 }
 
@@ -228,15 +228,22 @@ export class SqlJoinCompiler implements IJoinCompiler {
 // tslint:disable-next-line
 export interface SqlSelectQueryCompiler
   extends IWhereCompiler,
-  ILimitCompiler,
-  IColumnsCompiler,
-  ITableAliasCompiler,
-  IJoinCompiler,
-  IRecursiveCompiler { }
+    ILimitCompiler,
+    IColumnsCompiler,
+    ITableAliasCompiler,
+    IJoinCompiler,
+    IRecursiveCompiler {}
 
 @NewInstance()
 export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder> {
-  @use(SqlWhereCompiler, SqlLimitCompiler, SqlColumnsCompiler, TableAliasCompiler, SqlJoinCompiler, SqlWithRecursiveCompiler)
+  @use(
+    SqlWhereCompiler,
+    SqlLimitCompiler,
+    SqlColumnsCompiler,
+    TableAliasCompiler,
+    SqlJoinCompiler,
+    SqlWithRecursiveCompiler,
+  )
   /// @ts-ignore
   private this: this;
 
@@ -248,7 +255,6 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
   }
 
   public compile(): ICompilerOutput {
-
     if (this._builder.CteRecursive) {
       return this.recursive(this._builder as IWithRecursiveBuilder);
     }
@@ -306,7 +312,7 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
 }
 
 // tslint:disable-next-line
-export interface SqlUpdateQueryCompiler extends IWhereCompiler, ITableAliasCompiler { }
+export interface SqlUpdateQueryCompiler extends IWhereCompiler, ITableAliasCompiler {}
 
 @NewInstance()
 export class SqlUpdateQueryCompiler extends SqlQueryCompiler<UpdateQueryBuilder> {
@@ -356,7 +362,7 @@ export class SqlUpdateQueryCompiler extends SqlQueryCompiler<UpdateQueryBuilder>
 }
 
 // tslint:disable-next-line
-export interface SqlDeleteQueryCompiler extends IWhereCompiler, ITableAliasCompiler { }
+export interface SqlDeleteQueryCompiler extends IWhereCompiler, ITableAliasCompiler {}
 
 @NewInstance()
 export class SqlDeleteQueryCompiler extends SqlQueryCompiler<DeleteQueryBuilder> {
@@ -457,7 +463,7 @@ export class SqlIndexQueryCompiler extends IndexQueryCompiler {
       bindings: [],
       expression: `CREATE ${this._builder.Unique ? 'UNIQUE ' : ''}INDEX \`${this._builder.Name}\` ON ${
         this._builder.Table
-        } (${this._builder.Columns.map(c => `\`${c}\``).join(',')});`,
+      } (${this._builder.Columns.map(c => `\`${c}\``).join(',')});`,
     };
   }
 }
@@ -495,10 +501,8 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
   }
 
   protected values() {
-
-
     if (this._builder.Values.length === 0) {
-      throw new InvalidArgument("values count invalid");
+      throw new InvalidArgument('values count invalid');
     }
 
     const bindings: any[] = [];
@@ -506,7 +510,6 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
 
     data += this._builder.Values.map(val => {
       const toInsert = val.map((v, i) => {
-
         const descriptor = (this._builder.getColumns()[i] as ColumnStatement).Descriptor;
 
         if (descriptor && !descriptor.Nullable && !v && !descriptor.AutoIncrement) {
@@ -534,7 +537,6 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
   }
 
   protected columns() {
-
     const columns = this._builder
       .getColumns()
       .map(c => {
@@ -545,19 +547,19 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
       });
 
     if (columns.length === 0) {
-      throw new InvalidArgument("invalid column count");
+      throw new InvalidArgument('invalid column count');
     }
 
     return `(` + columns.join(',') + ')';
   }
 
   protected into() {
-    return `INSERT${this._builder.Ignore ? " IGNORE" : ""} INTO \`${this._builder.Table}\``;
+    return `INSERT${this._builder.Ignore ? ' IGNORE' : ''} INTO \`${this._builder.Table}\``;
   }
 }
 
 // tslint:disable-next-line
-export interface SqlTableQueryCompiler extends ITableAliasCompiler { }
+export interface SqlTableQueryCompiler extends ITableAliasCompiler {}
 
 @NewInstance()
 @Inject(Container)
@@ -642,12 +644,12 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
         _stmt.push(`${this.builder.Type.toUpperCase()}(${_precision},${_scale})`);
         break;
       case 'enum':
-        const _enums = this.builder.Args[0].map((a : any) => `'${a}'`).join(",")
+        const _enums = this.builder.Args[0].map((a: any) => `'${a}'`).join(',');
         _stmt.push(`${this.builder.Type.toUpperCase()}(${_enums})`);
         break;
-      case "binary":
+      case 'binary':
         _stmt.push(`BINARY(${this.builder.Args[0] ?? 255}`);
-      break;
+        break;
       default:
         _stmt.push(this.builder.Type.toUpperCase());
         break;
@@ -691,7 +693,7 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
     if (_.isString(this.builder.Default)) {
       _stmt = `DEFAULT '${this.builder.Default.trim()}'`;
     } else if (_.isNumber(this.builder.Default)) {
-      _stmt = `DEFAULT ${ this.builder.Default }`;
+      _stmt = `DEFAULT ${this.builder.Default}`;
     } else if (this.builder.Default instanceof RawQuery) {
       _stmt = `DEFAULT ${(this.builder.Default as RawQuery).Query}`;
     }
