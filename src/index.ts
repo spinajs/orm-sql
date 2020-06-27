@@ -1,4 +1,5 @@
-import { ColumnQueryCompiler } from '@spinajs/orm';
+import { SqlSetConverter } from './converters';
+import { ColumnQueryCompiler, SetValueConverter } from '@spinajs/orm';
 import {
   OrmDriver,
   InStatement,
@@ -83,5 +84,8 @@ export abstract class SqlDriver extends OrmDriver {
     this.Container.register(SqlIndexQueryCompiler).as(IndexQueryCompiler);
     this.Container.register(SqlForeignKeyQueryCompiler).as(ForeignKeyQueryCompiler);
     this.Container.register(SqlColumnQueryCompiler).as(ColumnQueryCompiler);
+
+    this.Container.register(SqlSetConverter).as(SetValueConverter);
+
   }
 }

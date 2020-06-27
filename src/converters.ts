@@ -1,12 +1,17 @@
 import { IValueConverter } from "@spinajs/orm";
 
-export class SetConverter implements IValueConverter
-{
+export class SqlSetConverter implements IValueConverter {
   public toDB(value: any) {
-    return value.join(',');
-  }  
+    if (value) {
+      return value.join(',');
+    }
+    return "";
+  }
 
   public fromDB(value: any) {
-     return value.split(',');
+    if (value) {
+      return value.split(',');
+    }
+    return [];
   }
 }

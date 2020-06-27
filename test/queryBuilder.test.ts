@@ -588,12 +588,12 @@ describe("Select query builder", () => {
 
     it("withRecursion simple", () => {
         const result = sqb().withRecursive("parent_id", "id").from("roles").columns(["id", "parent_id", "slug"]).toDB();
-        expect(result.expression).to.equal("WITH RECURSIVE recursive_cte AS ( SELECT `id`,`parent_id`,`slug` FROM `roles` UNION ALL SELECT `$recursive$`.`id`,`$recursive$`.`parent_id`,`$recursive$`.`slug` FROM `roles` as `$recursive$` INNER JOIN `recursive_cte` as `$recursive_cte$` ON `$recursive_cte$`.parent_id = `$recursive$`.id ) SELECT * FROM recursive_cte");
+        expect(result.expression).to.equal("WITH RECURSIVE recursive_cte AS ( SELECT `id`,`parent_id`,`slug` FROM `roles` UNION ALL SELECT `$recursive$`.`id`,`$recursive$`.`parent_id`,`$recursive$`.`slug` FROM `roles` as `$recursive$` INNER JOIN `recursive_cte` as `$recursive_cte$` ON `$recursive$`.parent_id = `$recursive$`.id ) SELECT * FROM recursive_cte");
     })
 
     it("withRecursion with where", () => {
         const result = sqb().withRecursive("parent_id", "id").from("roles").columns(["id", "parent_id", "slug"]).where("id", 2).toDB();
-        expect(result.expression).to.equal("WITH RECURSIVE recursive_cte AS ( SELECT `id`,`parent_id`,`slug` FROM `roles` WHERE id = ? UNION ALL SELECT `$recursive$`.`id`,`$recursive$`.`parent_id`,`$recursive$`.`slug` FROM `roles` as `$recursive$` INNER JOIN `recursive_cte` as `$recursive_cte$` ON `$recursive_cte$`.parent_id = `$recursive$`.id ) SELECT * FROM recursive_cte");
+        expect(result.expression).to.equal("WITH RECURSIVE recursive_cte AS ( SELECT `id`,`parent_id`,`slug` FROM `roles` WHERE id = ? UNION ALL SELECT `$recursive$`.`id`,`$recursive$`.`parent_id`,`$recursive$`.`slug` FROM `roles` as `$recursive$` INNER JOIN `recursive_cte` as `$recursive_cte$` ON `$recursive$`.parent_id = `$recursive$`.id ) SELECT * FROM recursive_cte");
         expect(result.bindings).to.be.an("array").to.include(2);
     })
 

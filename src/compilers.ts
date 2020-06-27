@@ -112,12 +112,12 @@ export class SqlWithRecursiveCompiler implements IRecursiveCompiler {
   public recursive(builder: IWithRecursiveBuilder): ICompilerOutput {
     const statement = builder.CteRecursive.build();
 
-    let exprr = "WITH RECURSIVE recursive_cte AS";
+    let exprr = `WITH RECURSIVE recursive_cte(${statement.Statements[0]}) AS`;
     exprr += ` ( `;
 
-    exprr += statement.Statements[0];
-    exprr += ` UNION ALL `;
     exprr += statement.Statements[1];
+    exprr += ` UNION ALL `;
+    exprr += statement.Statements[2];
 
     exprr += ` ) `;
     exprr += "SELECT * FROM recursive_cte";
@@ -642,6 +642,8 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
         _stmt.push(`${this.builder.Type.toUpperCase()}(${_precision},${_scale})`);
         break;
       case 'enum':
+        const _enums = this.builder.Args[0].map((a : any) => `'${a}'`).join(",")
+        _stmt.push(`${this.builder.Type.toUpperCase()}(${_enums})`);
         break;
       case "binary":
         _stmt.push(`BINARY(${this.builder.Args[0] ?? 255}`);

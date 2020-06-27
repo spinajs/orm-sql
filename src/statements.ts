@@ -33,11 +33,11 @@ export class SqlWithRecursiveStatement extends WithRecursiveStatement{
   {
     const initialQuery = this._query.clone().clearJoins().toDB();
     const additionalQuery = this._query.clone().clearWhere().clearJoins().setAlias("$recursive$").innerJoin("recursive_cte","$recursive_cte$", this._pkName, this._rcKeyName).toDB();
-
+    const cte_columns = this._query.getColumns().map( (c : ColumnStatement)=> c.Column).join(",");
 
     return {
       Bindings: initialQuery.bindings.concat(additionalQuery.bindings),
-      Statements: [initialQuery.expression, additionalQuery.expression],
+      Statements: [cte_columns, initialQuery.expression, additionalQuery.expression],
     };
   }
 }
