@@ -1,6 +1,6 @@
 {
   "name": "@spinajs/orm-sql",
-  "version": "1.0.24",
+  "version": "1.0.26",
   "description": "SpinaJS orm basic sql language support. Use it as base for specific db drivers",
   "main": "lib/index.js",
   "private": false,
@@ -12,7 +12,7 @@
     "prepare": "npm run build",
     "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
     "lint": "tslint -p tsconfig.json",
-    "prepublishOnly": "npm test && npm run lint",
+    "prepublishOnly": "",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
     "postversion": "git push && git push --tags"
@@ -38,7 +38,7 @@
   "homepage": "https://github.com/spinajs/orm-sql#readme",
   "dependencies": {
     "@spinajs/configuration": "^1.0.10",
-    "@spinajs/di": "^1.0.17",
+    "@spinajs/di": "^1.0.19",
     "@spinajs/orm": "^1.0.44",
     "typescript-mix": "^3.1.3"
   },

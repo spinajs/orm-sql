@@ -138,7 +138,7 @@ export class SqlForeignKeyQueryCompiler implements ForeignKeyQueryCompiler {
   }
 
   public compile(): ICompilerOutput {
-    const exprr = `FOREIGN KEY (${this._builder.ForeignKeyField}) REFERENCES ${this._builder.Table}(${this._builder.PrimaryKey}) ON DELETE ${this._builder.OnDeleteAction} ON UPDATE ${this._builder.OnUpdateAction}`;
+    const exprr = `FOREIGN KEY (${this._builder.ForeignKeyField}) REFERENCES \`${this._builder.Table}\`(${this._builder.PrimaryKey}) ON DELETE ${this._builder.OnDeleteAction} ON UPDATE ${this._builder.OnUpdateAction}`;
 
     return {
       bindings: [],
@@ -228,11 +228,11 @@ export class SqlJoinCompiler implements IJoinCompiler {
 // tslint:disable-next-line
 export interface SqlSelectQueryCompiler
   extends IWhereCompiler,
-    ILimitCompiler,
-    IColumnsCompiler,
-    ITableAliasCompiler,
-    IJoinCompiler,
-    IRecursiveCompiler {}
+  ILimitCompiler,
+  IColumnsCompiler,
+  ITableAliasCompiler,
+  IJoinCompiler,
+  IRecursiveCompiler { }
 
 @NewInstance()
 export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder> {
@@ -272,8 +272,8 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
       from +
       (join.expression ? ` ${join.expression}` : '') +
       (where.expression ? ` WHERE ${where.expression}` : '') +
-      limit.expression +
-      sort.expression;
+      sort.expression +
+      limit.expression;
 
     const bindings = [];
     bindings.push(...join.bindings);
@@ -312,7 +312,7 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
 }
 
 // tslint:disable-next-line
-export interface SqlUpdateQueryCompiler extends IWhereCompiler, ITableAliasCompiler {}
+export interface SqlUpdateQueryCompiler extends IWhereCompiler, ITableAliasCompiler { }
 
 @NewInstance()
 export class SqlUpdateQueryCompiler extends SqlQueryCompiler<UpdateQueryBuilder> {
@@ -362,7 +362,7 @@ export class SqlUpdateQueryCompiler extends SqlQueryCompiler<UpdateQueryBuilder>
 }
 
 // tslint:disable-next-line
-export interface SqlDeleteQueryCompiler extends IWhereCompiler, ITableAliasCompiler {}
+export interface SqlDeleteQueryCompiler extends IWhereCompiler, ITableAliasCompiler { }
 
 @NewInstance()
 export class SqlDeleteQueryCompiler extends SqlQueryCompiler<DeleteQueryBuilder> {
@@ -426,16 +426,17 @@ export class SqlOnDuplicateQueryCompiler implements OnDuplicateQueryCompiler {
       .getColumnsToUpdate()
       .map((c: string | RawQuery): string => {
         if (_.isString(c)) {
-          return `\`${c}\` = \`?\``;
+          return `\`${c}\` = ?`;
         } else {
           return c.Query;
         }
       })
       .join(',');
 
-    const bindings = _.flatMap(this._builder.getColumnsToUpdate(), (c: string | RawQuery): any => {
+    const valueMap = this._builder.getParent().getColumns().map((c : ColumnStatement) => c.Column);
+    const bindings = this._builder.getColumnsToUpdate().map((c: string | RawQuery): any => {
       if (_.isString(c)) {
-        return this._builder.getParent().Values[0];
+        return this._builder.getParent().Values[0][valueMap.indexOf(c)];
       } else {
         return c.Bindings;
       }
@@ -461,9 +462,9 @@ export class SqlIndexQueryCompiler extends IndexQueryCompiler {
   public compile(): ICompilerOutput {
     return {
       bindings: [],
-      expression: `CREATE ${this._builder.Unique ? 'UNIQUE ' : ''}INDEX \`${this._builder.Name}\` ON ${
+      expression: `CREATE ${this._builder.Unique ? 'UNIQUE ' : ''}INDEX \`${this._builder.Name}\` ON \`${
         this._builder.Table
-      } (${this._builder.Columns.map(c => `\`${c}\``).join(',')});`,
+        }\` (${this._builder.Columns.map(c => `\`${c}\``).join(',')});`,
     };
   }
 }
@@ -512,7 +513,7 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
       const toInsert = val.map((v, i) => {
         const descriptor = (this._builder.getColumns()[i] as ColumnStatement).Descriptor;
 
-        if (descriptor && !descriptor.Nullable && !v && !descriptor.AutoIncrement) {
+        if (descriptor && !descriptor.Nullable && (v === null || v === undefined) && !descriptor.AutoIncrement) {
           throw new InvalidArgument(`value column ${descriptor.Name} cannot be null`);
         }
 
@@ -559,7 +560,7 @@ export class SqlInsertQueryCompiler extends SqlQueryCompiler<InsertQueryBuilder>
 }
 
 // tslint:disable-next-line
-export interface SqlTableQueryCompiler extends ITableAliasCompiler {}
+export interface SqlTableQueryCompiler extends ITableAliasCompiler { }
 
 @NewInstance()
 @Inject(Container)
@@ -689,7 +690,7 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
     if (_.isNil(this.builder.Default) || (_.isString(this.builder.Default) && _.isEmpty(this.builder.Default.trim()))) {
       return _stmt;
     }
-
+ 
     if (_.isString(this.builder.Default)) {
       _stmt = `DEFAULT '${this.builder.Default.trim()}'`;
     } else if (_.isNumber(this.builder.Default)) {

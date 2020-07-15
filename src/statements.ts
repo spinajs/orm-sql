@@ -67,15 +67,16 @@ export class SqlBetweenStatement extends BetweenStatement {
 @NewInstance()
 export class SqlWhereStatement extends WhereStatement {
   public build(): IQueryStatementResult {
-    const binding = this._operator === WhereOperators.NOT_NULL || this._operator === WhereOperators.NULL ? '' : ' ?';
+    const isNullableQuery = this._operator === WhereOperators.NOT_NULL || this._operator === WhereOperators.NULL;
+    const binding = isNullableQuery ? '' : ' ?';
 
     let column = this._column;
     if (this._tableAlias) {
-      column = `${this._tableAlias}.${this._column}`;
+      column = `\`${this._tableAlias}\`.${this._column}`;
     }
 
     return {
-      Bindings: [this._value],
+      Bindings: isNullableQuery ? [] : [this._value],
       Statements: [`${column} ${this._operator.toUpperCase()}${binding}`],
     };
   }

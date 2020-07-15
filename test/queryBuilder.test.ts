@@ -531,7 +531,7 @@ describe("Relations query builder", () => {
     it("belongsTo simple", () => {
         const result = RelationModel.where("Id", 1).populate("Relation").toDB();
 
-        expect(result.expression).to.equal("SELECT `$RelationModel$`.*,`$Relation$`.`Id` as `$Relation$.Id`,`$Relation$`.`RelationProperty` as `$Relation$.RelationProperty` FROM `RelationTable` as `$RelationModel$` LEFT JOIN `RelationTable2` as `$Relation$` ON `$Relation$`.Id = `$RelationModel$`.relation_id WHERE $RelationModel$.Id = ?");
+        expect(result.expression).to.equal("SELECT `$RelationModel$`.*,`$Relation$`.`Id` as `$Relation$.Id`,`$Relation$`.`RelationProperty` as `$Relation$.RelationProperty` FROM `RelationTable` as `$RelationModel$` LEFT JOIN `RelationTable2` as `$Relation$` ON `$Relation$`.Id = `$RelationModel$`.relation_id WHERE `$RelationModel$`.Id = ?");
     });
 
     it("belongsTo nested", () => {
@@ -539,7 +539,7 @@ describe("Relations query builder", () => {
             this.populate("Relation3");
         }).toDB();
 
-        expect(result.expression).to.equal("SELECT `$RelationModel$`.*,`$RelationModel2$`.`Id` as `$Relation$.Id`,`$RelationModel2$`.`RelationProperty` as `$Relation$.RelationProperty`,`$Relation$.$Relation3$`.`Id` as `$Relation$.$Relation3$.Id`,`$Relation$.$Relation3$`.`RelationProperty3` as `$Relation$.$Relation3$.RelationProperty3` FROM `RelationTable` as `$RelationModel$` LEFT JOIN `RelationTable2` as `$Relation$` ON `$Relation$`.Id = `$RelationModel$`.relation_id LEFT JOIN `RelationTable3` as `$Relation$.$Relation3$` ON `$Relation$.$Relation3$`.Id = `$RelationModel2$`.relation3_id WHERE $RelationModel$.Id = ?");
+        expect(result.expression).to.equal("SELECT `$RelationModel$`.*,`$RelationModel2$`.`Id` as `$Relation$.Id`,`$RelationModel2$`.`RelationProperty` as `$Relation$.RelationProperty`,`$Relation$.$Relation3$`.`Id` as `$Relation$.$Relation3$.Id`,`$Relation$.$Relation3$`.`RelationProperty3` as `$Relation$.$Relation3$.RelationProperty3` FROM `RelationTable` as `$RelationModel$` LEFT JOIN `RelationTable2` as `$Relation$` ON `$Relation$`.Id = `$RelationModel$`.relation_id LEFT JOIN `RelationTable3` as `$Relation$.$Relation3$` ON `$Relation$.$Relation3$`.Id = `$RelationModel2$`.relation3_id WHERE `$RelationModel$`.Id = ?");
     });
 
     it("belongsTo with custom keys", () => {
