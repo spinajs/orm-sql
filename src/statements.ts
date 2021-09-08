@@ -14,7 +14,11 @@ import {
   WhereQueryStatement,
   WithRecursiveStatement,
   GroupByStatement,
-  RawQuery
+  RawQuery,
+  DateWrapper,
+  DateTimeWrapper,
+  Wrap,
+  WrapStatement
 } from '@spinajs/orm';
 import { WhereOperators } from '@spinajs/orm/lib/enums';
 
@@ -91,8 +95,16 @@ export class SqlWhereStatement extends WhereStatement {
     const binding = isNullableQuery ? '' : ' ?';
 
     let column = this._column;
-    if (this._tableAlias) {
-      column = `\`${this._tableAlias}\`.${this._column}`;
+    if (column instanceof Wrap) {
+      const wrapper = this._container.resolve<WrapStatement>(column.Wrapper, [
+        column.Column,
+        this._tableAlias
+      ]);
+      column = wrapper.wrap();
+    } else {
+      if (this._tableAlias) {
+        column = `\`${this._tableAlias}\`.${this._column}`;
+      }
     }
 
     return {
@@ -189,6 +201,26 @@ export class SqlColumnMethodStatement extends ColumnMethodStatement {
       Bindings: [] as any[],
       Statements: [_exprr],
     };
+  }
+}
+
+export abstract class SqlDateWrapper extends DateWrapper {
+  public wrap(): string {
+    if (this._tableAlias) {
+      return `DATE(\`${this._tableAlias}\`.\`${this._value}\`)`;
+    }
+
+    return `DATE(\`${this._value}\`)`;
+  }
+}
+
+export abstract class SqlDateTimeWrapper extends DateTimeWrapper {
+  public wrap(): string {
+    if (this._tableAlias) {
+      return `DATETIME(\`${this._tableAlias}\`.\`${this._value}\`)`;
+    }
+
+    return `DATETIME(\`${this._value}\`)`;
   }
 }
 

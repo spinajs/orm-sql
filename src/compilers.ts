@@ -181,7 +181,7 @@ export class SqlLimitCompiler implements ILimitCompiler {
 export class SqlGroupByCompiler implements IGroupByCompiler {
   public group(builder: IGroupByBuilder): ICompilerOutput {
     let bindings = [];
-    let stmt = 'GROUP BY ';
+    let stmt = ' GROUP BY ';
     const builds = builder.GroupStatements.map(x => x.build());
 
     stmt += builds.map(x => x.Statements).join(",");
@@ -189,7 +189,7 @@ export class SqlGroupByCompiler implements IGroupByCompiler {
 
     return {
       bindings,
-      expression: stmt,
+      expression: builds.length != 0 ? stmt : '',
     };
   }
 }

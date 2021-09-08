@@ -1,7 +1,7 @@
 import { IndexQueryBuilder, ReferentialAction } from '@spinajs/orm';
 import { expect } from 'chai';
 import 'mocha';
-import { SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, Orm, IWhereBuilder } from '@spinajs/orm';
+import { SelectQueryBuilder, SchemaQueryBuilder, DeleteQueryBuilder, InsertQueryBuilder, RawQuery, TableQueryBuilder, Orm, IWhereBuilder, Wrapper } from '@spinajs/orm';
 import { DI } from '@spinajs/di';
 import { Configuration } from "@spinajs/configuration";
 import { SpinaJsDefaultLog, LogModule } from "@spinajs/log";
@@ -607,7 +607,16 @@ describe("Select query builder", () => {
     it("group by raw", () =>{
         const result = sqb().groupBy(new RawQuery("DATE(`CreatedAt`)")).from("roles").columns(["id", "parent_id", "slug"]).toDB();
         expect(result.expression).to.equal("SELECT `id`,`parent`,`slug` FROM `roles` GROUP BY DATE(`CreatedAt`)");
+    })
 
+    it("wrap where date", () =>{
+        const result = sqb().from("roles").where(Wrapper.Date("CreatedAt"),"abc").columns(["id", "parent_id", "slug"]).toDB();
+        expect(result.expression).to.equal("SELECT `id`,`parent`,`slug` FROM `roles` WHERE DATE(`CreatedAt`) = ?");
+    })
+
+    it("wrap where datetime", () =>{
+        const result = sqb().from("roles").where(Wrapper.DateTime("CreatedAt"),"abc").columns(["id", "parent_id", "slug"]).toDB();
+        expect(result.expression).to.equal("SELECT `id`,`parent`,`slug` FROM `roles` WHERE DATETIME(`CreatedAt`) = ?");
     })
 
     it("withRecursion simple", () => {

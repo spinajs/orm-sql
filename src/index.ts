@@ -1,5 +1,5 @@
 import { SqlSetConverter } from './converters';
-import { ColumnQueryCompiler, SetValueConverter, GroupByStatement } from '@spinajs/orm';
+import { ColumnQueryCompiler, SetValueConverter, GroupByStatement, DateTimeWrapper, DateWrapper } from '@spinajs/orm';
 import {
   OrmDriver,
   InStatement,
@@ -39,6 +39,8 @@ import {
   SqlJoinStatement,
   SqlWithRecursiveStatement,
   SqlGroupByStatement,
+  SqlDateTimeWrapper,
+  SqlDateWrapper,
 } from './statements';
 import {
   SqlSelectQueryCompiler,
@@ -75,6 +77,9 @@ export abstract class SqlDriver extends OrmDriver {
     this.Container.register(SqlWhereQueryStatement).as(WhereQueryStatement);
     this.Container.register(SqlWithRecursiveStatement).as(WithRecursiveStatement);
     this.Container.register(SqlGroupByStatement).as(GroupByStatement);
+    this.Container.register(SqlDateTimeWrapper).as(DateTimeWrapper);
+    this.Container.register(SqlDateWrapper).as(DateWrapper);
+
 
     this.Container.register(SqlWithRecursiveCompiler).as(RecursiveQueryCompiler);
     this.Container.register(SqlSelectQueryCompiler).as(SelectQueryCompiler);
