@@ -73,7 +73,8 @@ describe("model generated queries", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false,
             },
             {
                 Type: "VARCHAR",
@@ -89,7 +90,9 @@ describe("model generated queries", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false,
+
 
             },
             {
@@ -106,7 +109,9 @@ describe("model generated queries", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false,
+
 
             }]);
         }));

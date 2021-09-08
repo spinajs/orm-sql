@@ -334,7 +334,8 @@ describe("Relations query builder", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false
             },
             {
                 Type: "INT",
@@ -350,7 +351,8 @@ describe("Relations query builder", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false
             },
             {
                 Type: "INT",
@@ -366,7 +368,8 @@ describe("Relations query builder", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false
             }]);
         })).withArgs("RelationTable2", undefined).returns(new Promise(res => {
             res([{
@@ -383,7 +386,8 @@ describe("Relations query builder", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false
             }, {
                 Type: "VARCHAR",
                 MaxLength: 0,
@@ -398,7 +402,8 @@ describe("Relations query builder", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false
             }]);
         })).withArgs("RelationTable3", undefined).returns(new Promise(res => {
             res([{
@@ -415,7 +420,8 @@ describe("Relations query builder", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false
             }, {
                 Type: "VARCHAR",
                 MaxLength: 0,
@@ -430,7 +436,8 @@ describe("Relations query builder", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false
             }])
         })).withArgs("JoinTable", undefined).returns(new Promise(res => {
             res([{
@@ -447,7 +454,8 @@ describe("Relations query builder", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false
             },
             {
                 Type: "INT",
@@ -463,7 +471,8 @@ describe("Relations query builder", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false
             },
             {
                 Type: "INT",
@@ -479,7 +488,8 @@ describe("Relations query builder", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false
             }
             ])
         })).withArgs("RelationTable4", undefined).returns(new Promise(res => {
@@ -497,7 +507,8 @@ describe("Relations query builder", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false
             },
             {
                 Type: "VARCHAR",
@@ -513,7 +524,8 @@ describe("Relations query builder", () => {
                 Converter: null,
                 Schema: "sqlite",
                 Unique: false,
-                Uuid: false
+                Uuid: false,
+                Ignore: false
             },
 
             ])
@@ -585,6 +597,18 @@ describe("Select query builder", () => {
     afterEach(async () => {
         DI.clear();
     });
+
+    it("group by simple", () =>{
+        const result = sqb().groupBy("Category").from("roles").columns(["id", "parent_id", "slug"]).toDB();
+        expect(result.expression).to.equal("SELECT `id`,`parent`,`slug` FROM `roles` GROUP BY `Category`");
+
+    })
+
+    it("group by raw", () =>{
+        const result = sqb().groupBy(new RawQuery("DATE(`CreatedAt`)")).from("roles").columns(["id", "parent_id", "slug"]).toDB();
+        expect(result.expression).to.equal("SELECT `id`,`parent`,`slug` FROM `roles` GROUP BY DATE(`CreatedAt`)");
+
+    })
 
     it("withRecursion simple", () => {
         const result = sqb().withRecursive("parent_id", "id").from("roles").columns(["id", "parent_id", "slug"]).toDB();

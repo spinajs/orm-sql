@@ -13,6 +13,8 @@ import {
   ColumnMethodStatement,
   WhereQueryStatement,
   WithRecursiveStatement,
+  GroupByStatement,
+  RawQuery
 } from '@spinajs/orm';
 import { WhereOperators } from '@spinajs/orm/lib/enums';
 
@@ -61,6 +63,24 @@ export class SqlBetweenStatement extends BetweenStatement {
       Bindings: this._val,
       Statements: [`${this._column} ${exprr} ? AND ?`],
     };
+  }
+}
+
+@NewInstance()
+export class SqlGroupByStatement extends GroupByStatement {
+  build(): IQueryStatementResult {
+    if (this._expr instanceof RawQuery) {
+
+      return {
+        Bindings: this._expr.Bindings,
+        Statements: [`${this._expr.Query}`],
+      };
+    } else {
+      return {
+        Bindings: [],
+        Statements: [`\`${this._expr}\``],
+      };
+    }
   }
 }
 

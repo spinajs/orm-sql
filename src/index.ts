@@ -1,5 +1,5 @@
 import { SqlSetConverter } from './converters';
-import { ColumnQueryCompiler, SetValueConverter } from '@spinajs/orm';
+import { ColumnQueryCompiler, SetValueConverter, GroupByStatement } from '@spinajs/orm';
 import {
   OrmDriver,
   InStatement,
@@ -23,6 +23,7 @@ import {
   WithRecursiveStatement,
   RecursiveQueryCompiler,
   ForeignKeyQueryCompiler,
+  GroupByQueryCompiler
 } from '@spinajs/orm';
 import { IContainer } from '@spinajs/di';
 import {
@@ -37,6 +38,7 @@ import {
   SqlWhereQueryStatement,
   SqlJoinStatement,
   SqlWithRecursiveStatement,
+  SqlGroupByStatement,
 } from './statements';
 import {
   SqlSelectQueryCompiler,
@@ -50,6 +52,7 @@ import {
   SqlWithRecursiveCompiler,
   SqlForeignKeyQueryCompiler,
   SqlColumnQueryCompiler,
+  SqlGroupByCompiler,
 } from './compilers';
 
 export * from './compilers';
@@ -71,6 +74,7 @@ export abstract class SqlDriver extends OrmDriver {
     this.Container.register(SqlColumnRawStatement).as(ColumnRawStatement);
     this.Container.register(SqlWhereQueryStatement).as(WhereQueryStatement);
     this.Container.register(SqlWithRecursiveStatement).as(WithRecursiveStatement);
+    this.Container.register(SqlGroupByStatement).as(GroupByStatement);
 
     this.Container.register(SqlWithRecursiveCompiler).as(RecursiveQueryCompiler);
     this.Container.register(SqlSelectQueryCompiler).as(SelectQueryCompiler);
@@ -83,6 +87,7 @@ export abstract class SqlDriver extends OrmDriver {
     this.Container.register(SqlIndexQueryCompiler).as(IndexQueryCompiler);
     this.Container.register(SqlForeignKeyQueryCompiler).as(ForeignKeyQueryCompiler);
     this.Container.register(SqlColumnQueryCompiler).as(ColumnQueryCompiler);
+    this.Container.register(SqlGroupByCompiler).as(GroupByQueryCompiler);
 
     this.Container.register(SqlSetConverter).as(SetValueConverter);
   }

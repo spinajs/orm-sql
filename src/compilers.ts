@@ -9,6 +9,7 @@ import {
   ICompilerOutput,
   ILimitBuilder,
   ILimitCompiler,
+  IGroupByCompiler,
   InsertQueryBuilder,
   IOrderByBuilder,
   IWhereBuilder,
@@ -33,6 +34,7 @@ import {
   IWithRecursiveBuilder,
   ForeignKeyBuilder,
   ForeignKeyQueryCompiler,
+  IGroupByBuilder,
 } from '@spinajs/orm';
 import { use } from 'typescript-mix';
 import { NewInstance, Inject, Container, Autoinject } from '@spinajs/di';
@@ -176,6 +178,23 @@ export class SqlLimitCompiler implements ILimitCompiler {
 }
 
 @NewInstance()
+export class SqlGroupByCompiler implements IGroupByCompiler {
+  public group(builder: IGroupByBuilder): ICompilerOutput {
+    let bindings = [];
+    let stmt = 'GROUP BY ';
+    const builds = builder.GroupStatements.map(x => x.build());
+
+    stmt += builds.map(x => x.Statements).join(",");
+    bindings = builds.map(x => x.Bindings);
+
+    return {
+      bindings,
+      expression: stmt,
+    };
+  }
+}
+
+@NewInstance()
 export class SqlColumnsCompiler implements IColumnsCompiler {
   public columns(builder: IColumnsBuilder) {
     return {
@@ -232,6 +251,7 @@ export interface SqlSelectQueryCompiler
   IColumnsCompiler,
   ITableAliasCompiler,
   IJoinCompiler,
+  IGroupByCompiler,
   IRecursiveCompiler { }
 
 @NewInstance()
@@ -243,6 +263,7 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
     TableAliasCompiler,
     SqlJoinCompiler,
     SqlWithRecursiveCompiler,
+    SqlGroupByCompiler
   )
   /// @ts-ignore
   private this: this;
@@ -265,6 +286,7 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
     const sort = this.sort(this._builder as IOrderByBuilder);
     const where = this.where(this._builder as IWhereBuilder);
     const join = this.join(this._builder as IJoinBuilder);
+    const group = this.group(this._builder as IGroupByBuilder);
 
     const expression =
       columns +
@@ -272,6 +294,7 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
       from +
       (join.expression ? ` ${join.expression}` : '') +
       (where.expression ? ` WHERE ${where.expression}` : '') +
+      group.expression +
       sort.expression +
       limit.expression;
 
@@ -280,6 +303,7 @@ export class SqlSelectQueryCompiler extends SqlQueryCompiler<SelectQueryBuilder>
     bindings.push(...where.bindings);
     bindings.push(...limit.bindings);
     bindings.push(...sort.bindings);
+    bindings.push(...group.bindings);
 
     return {
       bindings,
@@ -433,7 +457,7 @@ export class SqlOnDuplicateQueryCompiler implements OnDuplicateQueryCompiler {
       })
       .join(',');
 
-    const valueMap = this._builder.getParent().getColumns().map((c : ColumnStatement) => c.Column);
+    const valueMap = this._builder.getParent().getColumns().map((c: ColumnStatement) => c.Column);
     const bindings = this._builder.getColumnsToUpdate().map((c: string | RawQuery): any => {
       if (_.isString(c)) {
         return this._builder.getParent().Values[0][valueMap.indexOf(c)];
@@ -690,7 +714,7 @@ export class SqlColumnQueryCompiler implements ColumnQueryCompiler {
     if (_.isNil(this.builder.Default) || (_.isString(this.builder.Default) && _.isEmpty(this.builder.Default.trim()))) {
       return _stmt;
     }
- 
+
     if (_.isString(this.builder.Default)) {
       _stmt = `DEFAULT '${this.builder.Default.trim()}'`;
     } else if (_.isNumber(this.builder.Default)) {
