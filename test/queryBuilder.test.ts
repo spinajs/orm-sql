@@ -619,6 +619,12 @@ describe("Select query builder", () => {
         expect(result.expression).to.equal("SELECT `id`,`parent`,`slug` FROM `roles` WHERE DATETIME(`CreatedAt`) = ?");
     })
 
+    it("wrap where three params", () =>{
+        const result = sqb().from("roles").where(Wrapper.DateTime("CreatedAt"),"<", "abc").columns(["id", "parent_id", "slug"]).toDB();
+        expect(result.expression).to.equal("SELECT `id`,`parent`,`slug` FROM `roles` WHERE DATETIME(`CreatedAt`) < ?");
+    })
+
+
     it("withRecursion simple", () => {
         const result = sqb().withRecursive("parent_id", "id").from("roles").columns(["id", "parent_id", "slug"]).toDB();
         expect(result.expression).to.equal("WITH RECURSIVE recursive_cte AS ( SELECT `id`,`parent_id`,`slug` FROM `roles` UNION ALL SELECT `$recursive$`.`id`,`$recursive$`.`parent_id`,`$recursive$`.`slug` FROM `roles` as `$recursive$` INNER JOIN `recursive_cte` as `$recursive_cte$` ON `$recursive$`.parent_id = `$recursive$`.id ) SELECT * FROM recursive_cte");
